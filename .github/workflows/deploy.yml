@@ -1,0 +1,36 @@
+name: Deploy NPC Service to Live Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          known_hosts: 'placeholder-value' # Will be updated in the next step
+
+      - name: Add Server to Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy Code via rsync
+        env:
+          # ปรับเปลี่ยนโฟลเดอร์ปลายทางบน Server จริงได้ที่นี่ (Default: /var/www/html/npcservice/)
+          TARGET_DIR: '/var/www/html/npcservice/'
+        run: |
+          rsync -avz --delete \
+            --exclude '.git*' \
+            --exclude '.github*' \
+            --exclude 'config.php' \
+            --exclude 'uploads/*' \
+            ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:$TARGET_DIR
