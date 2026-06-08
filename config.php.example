@@ -1,0 +1,33 @@
+<?php
+/**
+ * Configuration Template for NPC Repair System
+ * 
+ * Instructions:
+ * 1. Copy this file to config.php (cp config.php.example config.php)
+ * 2. Fill in your database and LINE credentials in config.php
+ */
+
+// 1. Database Configurations
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'npcservice_db');
+
+// 2. LINE Messaging API Configs
+define('LINE_CHANNEL_ACCESS_TOKEN', 'YOUR_LINE_CHANNEL_ACCESS_TOKEN_HERE');
+define('LINE_TARGET_ID', 'YOUR_LINE_TARGET_ID_HERE');
+
+// 3. Base URL Resolution (Auto-detects localhost vs. production server URL)
+if (isset($_SERVER['HTTP_HOST'])) {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    $reqDir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    $baseUrl = $protocol . $_SERVER['HTTP_HOST'] . ($reqDir ? $reqDir : '') . '/';
+} else {
+    $baseUrl = 'https://service.npc.ac.th/npcservice/';
+}
+define('BASE_URL', $baseUrl);
+
+// 4. File Upload Configurations
+define('UPLOAD_DIR', __DIR__ . '/uploads/');
+define('UPLOAD_URL', BASE_URL . 'uploads/');
+?>

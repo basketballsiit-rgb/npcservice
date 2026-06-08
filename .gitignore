@@ -1,0 +1,14 @@
+# Ignore local configurations with credentials and tokens
+config.php
+
+# Ignore uploaded media/evidence files
+uploads/*
+!uploads/.gitkeep
+
+# System and IDE temporary files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.log

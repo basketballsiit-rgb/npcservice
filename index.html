@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+
+    <title>ระบบแจ้งซ่อมแซม งานอาคารสถานที่</title>
+    <style>
+        /* Background Gradient */
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%); 
+            min-height: 100vh;
+            color: #334155;
+        }
+        
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Modern Input Style */
+        .modern-input {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.75rem; 
+            color: #334155; 
+            transition: all 0.2s ease-in-out;
+        }
+        .modern-input:focus {
+            border-color: #6366f1; 
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+        .modern-input::placeholder { color: #94a3b8; }
+
+        /* Upload Zone */
+        .drop-zone { 
+            border: 2px dashed #94a3b8; 
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+        }
+        .drop-zone.dragover { 
+            background-color: #eef2ff; 
+            border-color: #6366f1; 
+            transform: scale(1.01);
+        }
+
+        /* Card Hover */
+        .stat-card { transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1); }
+
+        /* Print Styles */
+        @media print {
+            body { background: none; }
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            @page { size: A4; margin: 2cm; }
+            .print-header { text-align: center; font-family: 'Sarabun'; font-size: 18pt; font-weight: bold; }
+            .print-table { width: 100%; border-collapse: collapse; font-family: 'Sarabun'; font-size: 14pt; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <header class="text-center mb-10 mt-4">
+           <div class="inline-block p-0 rounded-full bg-white shadow-lg mb-4 border border-white/50 overflow-hidden">
+               <img src="https://img2.pic.in.th/pic/Logo-.641ef5fae2216b71.png" alt="Logo" class="h-28 w-28 object-cover mx-auto">
+           </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight drop-shadow-sm">ระบบแจ้งซ่อม งานอาคารสถานที่</h1>
+            <p class="text-slate-500 mt-2 text-lg font-medium">วิทยาลัยสารพัดช่างน่าน</p>
+        </header>
+
+        <main id="page-content" class="space-y-8">
+            <div id="user-page">
+                
+                <section id="dashboard" class="mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-slate-700 flex items-center gap-2">
+                            <div class="p-2 bg-white rounded-lg shadow-sm"><svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg></div>
+                            ภาพรวมสถานะ
+                        </h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="stat-card relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-lg text-white">
+                            <div class="absolute right-0 top-0 h-full w-32 bg-white opacity-10 transform skew-x-12 translate-x-10"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-100 uppercase tracking-wider">การแจ้งซ่อมทั้งหมด</p>
+                                        <p id="total-repairs" class="text-5xl font-bold mt-2">0</p>
+                                    </div>
+                                    <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 shadow-lg text-white">
+                            <div class="absolute right-0 top-0 h-full w-32 bg-white opacity-10 transform skew-x-12 translate-x-10"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-emerald-100 uppercase tracking-wider">ดำเนินการแล้ว</p>
+                                        <p id="resolved-repairs" class="text-5xl font-bold mt-2">0</p>
+                                    </div>
+                                    <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card relative overflow-hidden bg-gradient-to-br from-orange-400 to-amber-500 rounded-2xl p-6 shadow-lg text-white">
+                            <div class="absolute right-0 top-0 h-full w-32 bg-white opacity-10 transform skew-x-12 translate-x-10"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-orange-100 uppercase tracking-wider">อยู่ระหว่างดำเนินการ</p>
+                                        <p id="pending-repairs" class="text-5xl font-bold mt-2">0</p>
+                                    </div>
+                                    <div class="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-100">
+                            <h3 class="text-lg font-bold text-slate-700 mb-4">สถิติการแจ้งซ่อมรายเดือน</h3>
+                            <div class="h-64 w-full"><canvas id="repairsChart"></canvas></div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-100 flex flex-col items-center">
+                                <h3 class="text-sm font-bold text-slate-700 mb-2">สัดส่วนประเภทการซ่อม</h3>
+                                <div class="h-48 w-full relative"><canvas id="typeChart"></canvas></div>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-100 flex flex-col items-center">
+                                <h3 class="text-sm font-bold text-slate-700 mb-2">สัดส่วนสถานที่แจ้งซ่อม</h3>
+                                <div class="h-48 w-full relative"><canvas id="locationChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="repair-form-section" class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-slate-800 to-slate-700 px-8 py-5 border-b border-slate-600">
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                            <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            แบบฟอร์มแจ้งซ่อมแซม
+                        </h2>
+                        <p class="text-slate-300 text-sm mt-1 ml-9">กรอกข้อมูลให้ครบถ้วนเพื่อความรวดเร็วในการดำเนินการ</p>
+                    </div>
+                    
+                    <div class="p-8 md:p-10 bg-white">
+                        <form id="repair-form" class="space-y-8">
+                            <div>
+                                <label class="block text-base font-bold text-slate-700 mb-2">วันที่แจ้ง <span class="text-red-500">*</span></label>
+                                <div class="relative max-w-md">
+                                    <input type="text" id="requestDate" name="requestDate" required class="modern-input w-full px-4 py-3 pl-12 text-lg bg-slate-50">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">ชื่อ-นามสกุล <span class="text-red-500">*</span></label>
+                                    <input type="text" name="fullName" id="fullName" required class="modern-input w-full px-4 py-3 text-base bg-slate-50" placeholder="ระบุชื่อจริง-นามสกุล">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">ตำแหน่ง <span class="text-red-500">*</span></label>
+                                    <input type="text" name="position" id="position" required class="modern-input w-full px-4 py-3 text-base bg-slate-50" placeholder="เช่น ครูผู้สอน, เจ้าหน้าที่">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">เบอร์โทรศัพท์ <span class="text-red-500">*</span></label>
+                                    <input type="text" name="phone" id="phone" class="modern-input w-full px-4 py-3 text-base bg-slate-50" placeholder="0xxxxxxxxx">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">ต้องการให้ติดต่อกลับ</label>
+                                    <div class="flex items-center gap-8 mt-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                        <label class="flex items-center cursor-pointer gap-2">
+                                            <input type="radio" class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-gray-300" name="contactBack" value="ต้องการ" checked>
+                                            <span class="text-slate-700 font-medium">ต้องการ</span>
+                                        </label>
+                                        <label class="flex items-center cursor-pointer gap-2">
+                                            <input type="radio" class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-gray-300" name="contactBack" value="ไม่ต้องการ">
+                                            <span class="text-slate-700 font-medium">ไม่ต้องการ</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100 space-y-6">
+                                <div class="flex items-center gap-2 mb-2 border-b border-indigo-100 pb-2">
+                                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                    <h3 class="text-lg font-bold text-indigo-900">ข้อมูลการแจ้งซ่อม</h3>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-bold text-slate-700 mb-2">ประเภทการซ่อม <span class="text-red-500">*</span></label>
+                                    <select id="repairType" name="repairType" required class="modern-input w-full px-4 py-3 bg-white">
+                                        <option value="" disabled selected class="text-gray-400">กำลังโหลดประเภทงานซ่อม...</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 mb-2">สถานที่แจ้งซ่อม <span class="text-red-500">*</span></label>
+                                        <select id="location_building" name="location_building" required class="modern-input w-full px-4 py-3 bg-white">
+                                            <option value="" disabled selected class="text-gray-400">กำลังโหลดอาคาร/สถานที่...</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-700 mb-2">ระบุเลขห้อง/ชื่อห้อง <span class="text-red-500">*</span></label>
+                                        <input type="text" id="location_room" name="location_room" required class="modern-input w-full px-4 py-3 bg-white" placeholder="เช่น ห้อง 202, ห้องพักครู">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">รายละเอียดอาการเสีย <span class="text-red-500">*</span></label>
+                                <textarea id="details" name="details" rows="4" required class="modern-input w-full px-4 py-3 bg-slate-50" placeholder="อธิบายอาการเสีย หรือรายละเอียดเพิ่มเติมให้ชัดเจน..."></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">แนบภาพถ่าย (1 ภาพ)</label>
+                                <div id="drop-zone" class="drop-zone rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer text-center hover:bg-indigo-50 border-2 border-dashed border-slate-300">
+                                    <div class="p-4 bg-indigo-100 rounded-full shadow-sm mb-3">
+                                        <svg class="mx-auto h-8 w-8 text-indigo-600" stroke="currentColor" fill="none" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                                    </div>
+                                    <div class="text-sm text-slate-600">
+                                        <label for="file-upload" class="font-bold text-indigo-600 hover:text-indigo-500 cursor-pointer text-lg">
+                                            <span>คลิกเพื่ออัปโหลดภาพ</span>
+                                            <input id="file-upload" name="file-upload" type="file" accept="image/*" class="sr-only">
+                                        </label>
+                                        <span class="pl-1 text-base">หรือลากไฟล์มาวางที่นี่</span>
+                                    </div>
+                                    <p class="text-xs text-slate-400 mt-2">รองรับไฟล์ภาพ (JPG, PNG) สูงสุด 1 ภาพ</p>
+                                </div>
+                                <div id="file-name-display" class="mt-6"></div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                    <div class="px-8 py-6 bg-slate-50 border-t border-slate-200 flex justify-end">
+                        <button type="submit" form="repair-form" id="submit-btn" class="inline-flex justify-center py-3 px-10 border border-transparent shadow-lg text-lg font-bold rounded-2xl text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105">
+                            🚀 ส่งเรื่องแจ้งซ่อม
+                        </button>
+                   </div>
+                </section>
+
+                <section id="user-status-section" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
+                    <h2 class="text-2xl font-bold text-slate-700 mb-6 border-l-8 border-indigo-500 pl-4">สถานะการแจ้งซ่อมของฉัน</h2>
+                    
+                    <div class="flex flex-col md:flex-row gap-4 mb-6">
+                        <select id="user-filter-status" class="modern-input w-full md:w-1/4 px-4 py-2 bg-slate-50">
+                            <option value="">ทั้งหมด</option>
+                            <option>ยังไม่ดำเนินการ</option>
+                            <option>อยู่ระหว่างดำเนินการ</option>
+                            <option>ดำเนินการแล้ว</option>
+                        </select>
+                        <input type="text" id="user-search-ref-id" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="modern-input w-full md:w-3/4 px-4 py-2 bg-slate-50">
+                    </div>
+                    
+                    <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                        <div class="overflow-x-auto no-scrollbar">
+                            <table class="min-w-full divide-y divide-slate-200">
+                                <thead class="bg-slate-100">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-600 uppercase tracking-wider">วันที่</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-600 uppercase tracking-wider">เลขที่อ้างอิง</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-600 uppercase tracking-wider">สถานะ</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-600 uppercase tracking-wider">หมายเหตุ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-status-table-body" class="bg-white divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="user-pagination-controls" class="mt-6 flex justify-center items-center gap-2"></div>
+                </section>
+            </div>
+            
+            <div id="admin-page" class="hidden">
+                <section class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-slate-100 pb-6">
+                        <h2 class="text-3xl font-bold text-slate-800 border-l-8 border-indigo-500 pl-4">Admin Dashboard</h2>
+                        <div class="flex gap-3">
+                             <button id="print-report-btn" class="px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 font-bold transition border border-blue-100 shadow-sm">🖨️ พิมพ์รายงาน</button>
+                             <button id="logout-btn" class="px-5 py-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 font-bold transition border border-rose-100 shadow-sm">🚪 ออกจากระบบ</button>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Tabs -->
+                    <div class="flex border-b border-slate-200 mb-6">
+                        <button id="tab-repairs-btn" class="px-6 py-3 border-b-2 border-indigo-600 text-indigo-600 font-bold text-lg focus:outline-none transition">📋 รายการแจ้งซ่อม</button>
+                        <button id="tab-settings-btn" class="px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold text-lg focus:outline-none transition">⚙️ ตั้งค่าระบบ</button>
+                    </div>
+
+                    <!-- Tab 1 Content: Repairs List -->
+                    <div id="admin-repairs-content" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <select id="admin-filter-status" class="modern-input px-4 py-2 bg-slate-50">
+                                <option value="">ทั้งหมด</option>
+                                <option>ยังไม่ดำเนินการ</option>
+                                <option>อยู่ระหว่างดำเนินการ</option>
+                                <option>ดำเนินการแล้ว</option>
+                            </select>
+                            <input type="text" id="admin-search-ref-id" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="modern-input px-4 py-2 bg-slate-50">
+                        </div>
+
+                        <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                            <div class="overflow-x-auto no-scrollbar">
+                                <table class="min-w-full divide-y divide-slate-200">
+                                    <thead class="bg-slate-100">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">วันที่</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">ผู้แจ้ง</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">สถานที่/ห้อง</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">เบอร์โทร</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">อาการ</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">หลักฐาน</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">สถานะ</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-table-body" class="bg-white divide-y divide-slate-200"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div id="admin-pagination-controls" class="mt-6 flex justify-center items-center gap-2"></div>
+                    </div>
+
+                    <!-- Tab 2 Content: System Settings -->
+                    <div id="admin-settings-content" class="hidden space-y-8">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Left: LINE Notification Configuration -->
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                                <h3 class="text-lg font-bold text-slate-700 border-b border-slate-200 pb-2">🔔 ตั้งค่า LINE Notifications</h3>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-600 mb-1">LINE Channel Access Token</label>
+                                    <textarea id="settings-line-token" rows="3" class="modern-input w-full px-4 py-2.5 text-sm" placeholder="ใส่ Channel Access Token ที่นี่..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-600 mb-1">LINE Target ID (Group ID / User ID)</label>
+                                    <input type="text" id="settings-line-target" class="modern-input w-full px-4 py-2.5 text-sm" placeholder="ใส่ Group ID หรือ User ID ที่นี่...">
+                                </div>
+                            </div>
+                            
+                            <!-- Right: Security / Change Password -->
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                                <h3 class="text-lg font-bold text-slate-700 border-b border-slate-200 pb-2">🔒 เปลี่ยนรหัสผ่าน Admin</h3>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-600 mb-1">รหัสผ่านปัจจุบัน</label>
+                                    <input type="password" id="change-pass-current" class="modern-input w-full px-4 py-2.5 text-sm" placeholder="ระบุรหัสผ่านปัจจุบัน">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-600 mb-1">รหัสผ่านใหม่</label>
+                                    <input type="password" id="change-pass-new" class="modern-input w-full px-4 py-2.5 text-sm" placeholder="ระบุรหัสผ่านใหม่">
+                                </div>
+                                <div class="pt-2">
+                                    <button id="save-password-btn" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold transition shadow-md">เปลี่ยนรหัสผ่าน</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dropdowns Configurations -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Repair Types -->
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-2">
+                                <h3 class="text-lg font-bold text-slate-700 border-b border-slate-200 pb-2">🛠️ รายการประเภทการซ่อม (1 รายการต่อบรรทัด)</h3>
+                                <textarea id="settings-repair-types" rows="8" class="modern-input w-full px-4 py-2.5 text-sm font-mono" placeholder="เช่น:&#10;ระบบไฟฟ้า/เครื่องปรับอากาศ&#10;การซ่อมบำรุงทั่วไป (งานอาคาร)"></textarea>
+                            </div>
+
+                            <!-- Locations -->
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-2">
+                                <h3 class="text-lg font-bold text-slate-700 border-b border-slate-200 pb-2">📍 รายชื่ออาคาร/สถานที่ (1 รายการต่อบรรทัด)</h3>
+                                <textarea id="settings-repair-locations" rows="8" class="modern-input w-full px-4 py-2.5 text-sm font-mono" placeholder="เช่น:&#10;อาคาร 1 อาคารเรียน&#10;อาคาร 2 สำนักงาน"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4 border-t border-slate-200">
+                            <button id="save-settings-btn" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl hover:from-indigo-700 hover:to-blue-700 font-bold transition-all shadow-lg transform hover:scale-105">💾 บันทึกการตั้งค่าระบบ</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <footer class="text-center mt-16 pb-8">
+            <div class="flex justify-center items-center space-x-2 text-sm text-slate-500 font-medium">
+                <span>© <span id="current-year"></span> งานอาคารสถานที่ วิทยาลัยสารพัดช่างน่าน</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">
+                <a href="#" class="hover:text-slate-600 transition">Developed by Niphon</a> |
+                <a href="#" id="admin-login-link" class="hover:text-indigo-600 font-semibold transition">Admin Login</a>
+            </p>
+        </footer>
+    </div>
+    
+    <div id="print-modal" class="hidden fixed z-50 inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-slate-100">
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-slate-800 mb-6">ตัวกรองรายงาน</h3>
+                 <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">จากวันที่</label>
+                        <input type="text" id="start-date" class="modern-input w-full px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">ถึงวันที่</label>
+                        <input type="text" id="end-date" class="modern-input w-full px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">สถานะ</label>
+                        <select id="print-filter-status" class="modern-input w-full px-4 py-2">
+                            <option value="">ทั้งหมด</option>
+                            <option>ยังไม่ดำเนินการ</option>
+                            <option>อยู่ระหว่างดำเนินการ</option>
+                            <option>ดำเนินการแล้ว</option>
+                        </select>
+                    </div>
+                </div>
+                 <div class="flex items-center justify-center gap-3 mt-8">
+                    <button id="confirm-print-btn" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md font-bold">ยืนยัน</button>
+                    <button id="cancel-print-btn" class="px-6 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition font-medium">ยกเลิก</button>
+                </div>
+            </div>
+         </div>
+    </div>
+    <div id="print-area" class="hidden"></div>
+
+    <script>
+    // --- GOOGLE APPS SCRIPT PROXY ADAPTER FOR PHP BACKEND ---
+    const google = {
+        script: {
+            run: {
+                withSuccessHandler(successCallback) {
+                    const defaultFailureCallback = (err) => {
+                        console.error("API Error Details:", err);
+                        Swal.fire('ข้อผิดพลาด', err.message || 'การเชื่อมต่อระบบล้มเหลว', 'error');
+                    };
+                    return makeScriptRunProxy(successCallback, defaultFailureCallback);
+                }
+            }
+        }
+    };
+
+    function makeScriptRunProxy(successCallback, failureCallback) {
+        const handler = {
+            get(target, prop) {
+                if (prop === 'withFailureHandler') {
+                    return function(customFailureCallback) {
+                        return makeScriptRunProxy(successCallback, customFailureCallback);
+                    };
+                }
+                return async function(...args) {
+                    try {
+                        const response = await fetch('api.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                action: prop,
+                                arguments: args
+                            })
+                        });
+                        if (!response.ok) {
+                            throw new Error(`HTTP Error: ${response.status}`);
+                        }
+                        const res = await response.json();
+                        if (res && res.status === 'error' && res.message) {
+                            failureCallback(new Error(res.message));
+                        } else {
+                            successCallback(res);
+                        }
+                    } catch (error) {
+                        failureCallback(error);
+                    }
+                };
+            }
+        };
+        return new Proxy({}, handler);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- VARIABLES ---
+        let allRepairs = [];
+        let currentPageUser = 1, currentPageAdmin = 1;
+        const rowsPerPage = 15;
+        let fileStore = [];
+        const MAX_FILES = 1;
+        let myChart = null, typeChart = null, locationChart = null; // Chart instances
+
+        // --- DOM ELEMENTS ---
+        const userPage = document.getElementById('user-page');
+        const adminPage = document.getElementById('admin-page');
+        const repairForm = document.getElementById('repair-form');
+        const dropZone = document.getElementById('drop-zone');
+        
+        // --- INIT ---
+        initialize();
+        function initialize() {
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            flatpickr("#requestDate", { dateFormat: "Y-m-d", defaultDate: "today", locale: "th" });
+            resetButtonState(); 
+            addEventListeners();
+            loadFormConfig();
+            loadDashboardAndUserData();
+        }
+
+        function loadFormConfig() {
+            google.script.run.withSuccessHandler(res => {
+                if (res.status === 'success') {
+                    // Populate Repair Types
+                    const typeSelect = document.getElementById('repairType');
+                    typeSelect.innerHTML = '<option value="" disabled selected class="text-gray-400">-- เลือกประเภท --</option>';
+                    res.repair_types.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type;
+                        option.textContent = type;
+                        typeSelect.appendChild(option);
+                    });
+
+                    // Populate Locations
+                    const locationSelect = document.getElementById('location_building');
+                    locationSelect.innerHTML = '<option value="" disabled selected class="text-gray-400">-- เลือกอาคาร/สถานที่ --</option>';
+                    res.repair_locations.forEach(loc => {
+                        const option = document.createElement('option');
+                        option.value = loc;
+                        option.textContent = loc;
+                        locationSelect.appendChild(option);
+                    });
+                }
+            }).getFormConfig();
+        }
+
+        function addEventListeners() {
+            document.getElementById('admin-login-link').addEventListener('click', showAdminLogin);
+            
+            // Logout Session and UI Toggle
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                showLoader('กำลังออกจากระบบ...');
+                google.script.run.withSuccessHandler(() => {
+                    Swal.close();
+                    adminPage.classList.add('hidden');
+                    userPage.classList.remove('hidden');
+                    document.getElementById('tab-repairs-btn').click();
+                    loadDashboardAndUserData();
+                }).adminLogout();
+            });
+            
+            repairForm.addEventListener('submit', handleFormSubmit);
+            
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            dropZone.addEventListener('dragleave', e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+            dropZone.addEventListener('drop', handleFileDrop);
+            document.getElementById('file-upload').addEventListener('change', handleFileSelect);
+
+            document.getElementById('user-filter-status').addEventListener('change', () => { currentPageUser = 1; renderUserStatusTable(); });
+            document.getElementById('user-search-ref-id').addEventListener('keyup', () => { currentPageUser = 1; renderUserStatusTable(); });
+            document.getElementById('admin-filter-status').addEventListener('change', () => { currentPageAdmin = 1; renderAdminTable(); });
+            document.getElementById('admin-search-ref-id').addEventListener('keyup', () => { currentPageAdmin = 1; renderAdminTable(); });
+
+            document.getElementById('print-report-btn').addEventListener('click', showPrintModal);
+            document.getElementById('cancel-print-btn').addEventListener('click', () => document.getElementById('print-modal').classList.add('hidden'));
+            document.getElementById('confirm-print-btn').addEventListener('click', handlePrint);
+
+            // Admin Page Tabs Switch
+            const tabRepairsBtn = document.getElementById('tab-repairs-btn');
+            const tabSettingsBtn = document.getElementById('tab-settings-btn');
+            const repairsContent = document.getElementById('admin-repairs-content');
+            const settingsContent = document.getElementById('admin-settings-content');
+
+            tabRepairsBtn.addEventListener('click', () => {
+                tabRepairsBtn.className = "px-6 py-3 border-b-2 border-indigo-600 text-indigo-600 font-bold text-lg focus:outline-none transition";
+                tabSettingsBtn.className = "px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold text-lg focus:outline-none transition";
+                repairsContent.classList.remove('hidden');
+                settingsContent.classList.add('hidden');
+            });
+
+            tabSettingsBtn.addEventListener('click', () => {
+                tabSettingsBtn.className = "px-6 py-3 border-b-2 border-indigo-600 text-indigo-600 font-bold text-lg focus:outline-none transition";
+                tabRepairsBtn.className = "px-6 py-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold text-lg focus:outline-none transition";
+                settingsContent.classList.remove('hidden');
+                repairsContent.classList.add('hidden');
+                loadSystemSettings();
+            });
+
+            // Admin Settings Action Buttons
+            document.getElementById('save-settings-btn').addEventListener('click', saveSystemSettings);
+            document.getElementById('save-password-btn').addEventListener('click', saveAdminPassword);
+        }
+
+        function loadSystemSettings() {
+            showLoader('กำลังโหลดตั้งค่าระบบ...');
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    document.getElementById('settings-line-token').value = res.line_channel_access_token;
+                    document.getElementById('settings-line-target').value = res.line_target_id;
+                    document.getElementById('settings-repair-types').value = res.repair_types.join('\n');
+                    document.getElementById('settings-repair-locations').value = res.repair_locations.join('\n');
+                } else {
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลตั้งค่าได้', 'error');
+                }
+            }).getSystemSettings();
+        }
+
+        function saveSystemSettings() {
+            const token = document.getElementById('settings-line-token').value.trim();
+            const target = document.getElementById('settings-line-target').value.trim();
+            const types = document.getElementById('settings-repair-types').value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            const locations = document.getElementById('settings-repair-locations').value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+            
+            if (!token || !target || types.length === 0 || locations.length === 0) {
+                Swal.fire('คำเตือน', 'กรุณากรอกข้อมูลตั้งค่าให้ครบถ้วน', 'warning');
+                return;
+            }
+            
+            showLoader('กำลังบันทึกตั้งค่า...');
+            const settingsObject = {
+                line_channel_access_token: token,
+                line_target_id: target,
+                repair_types: types,
+                repair_locations: locations
+            };
+            
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    Swal.fire('สำเร็จ', 'บันทึกตั้งค่าระบบเรียบร้อยแล้ว', 'success').then(() => {
+                        loadFormConfig();
+                    });
+                } else {
+                    Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                }
+            }).updateSystemSettings(settingsObject);
+        }
+
+        function saveAdminPassword() {
+            const currentPass = document.getElementById('change-pass-current').value;
+            const newPass = document.getElementById('change-pass-new').value;
+            
+            if (!currentPass || !newPass) {
+                Swal.fire('คำเตือน', 'กรุณากรอกข้อมูลรหัสผ่านให้ครบถ้วน', 'warning');
+                return;
+            }
+            
+            showLoader('กำลังเปลี่ยนรหัสผ่าน...');
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    Swal.fire('สำเร็จ', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว', 'success').then(() => {
+                        document.getElementById('change-pass-current').value = '';
+                        document.getElementById('change-pass-new').value = '';
+                    });
+                } else {
+                    Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                }
+            }).changeAdminPassword(currentPass, newPass);
+        }
+
+        function formatPhoneNumber(phone) {
+            if (!phone) return '-';
+            let str = String(phone);
+            if (!str.startsWith('0')) str = '0' + str;
+            return str;
+        }
+
+        async function showAdminLogin(e) {
+            if(e) e.preventDefault();
+            const { value: formValues } = await Swal.fire({
+                title: 'เข้าสู่ระบบเจ้าหน้าที่',
+                html: '<div class="space-y-3 mt-4"><input id="swal-input-user" class="modern-input w-full px-4 py-2" placeholder="Username"><input id="swal-input-pass" class="modern-input w-full px-4 py-2" placeholder="Password" type="password"></div>',
+                focusConfirm: false, showCancelButton: true, confirmButtonText: 'เข้าสู่ระบบ', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#4f46e5',
+                preConfirm: () => [document.getElementById('swal-input-user').value, document.getElementById('swal-input-pass').value]
+            });
+
+            if (formValues) {
+                const [username, password] = formValues;
+                if (!username || !password) { Swal.fire('ข้อผิดพลาด', 'กรุณากรอกข้อมูลให้ครบ', 'warning'); return; }
+                showLoader('กำลังตรวจสอบ...');
+                google.script.run.withSuccessHandler(isValid => {
+                    Swal.close();
+                    if (isValid) {
+                        userPage.classList.add('hidden'); adminPage.classList.remove('hidden'); loadAdminData();
+                        Swal.fire({ icon: 'success', title: 'ยินดีต้อนรับ', showConfirmButton: false, timer: 1500 });
+                    } else { Swal.fire('ปฏิเสธการเข้าถึง', 'ข้อมูลไม่ถูกต้อง', 'error'); }
+                }).withFailureHandler(err => Swal.fire('Error', err.message, 'error')).verifyAdminLogin(username, password);
+            }
+        }
+        
+        function showLoader(title = 'กรุณารอสักครู่...') { Swal.fire({ title: title, allowOutsideClick: false, didOpen: () => Swal.showLoading() }); }
+
+        function loadDashboardAndUserData() {
+            showLoader('กำลังโหลดข้อมูล...');
+            google.script.run.withSuccessHandler(data => { allRepairs = data; renderDashboard(data); currentPageUser = 1; renderUserStatusTable(); Swal.close(); }).getRepairData();
+        }
+
+        function loadAdminData() {
+            showLoader('กำลังโหลดข้อมูล...');
+            google.script.run.withSuccessHandler(data => { allRepairs = data; currentPageAdmin = 1; renderAdminTable(); Swal.close(); }).getRepairData();
+        }
+
+        function renderDashboard(data) {
+            // Basic Stats
+            document.getElementById('total-repairs').textContent = data.length;
+            document.getElementById('resolved-repairs').textContent = data.filter(c => c['สถานะการดำเนินการ'] === 'ดำเนินการแล้ว').length;
+            document.getElementById('pending-repairs').textContent = data.filter(c => c['สถานะการดำเนินการ'] === 'อยู่ระหว่างดำเนินการ').length;
+            
+            // 1. Bar Chart: Monthly Stats
+            const monthlyCtx = document.getElementById('repairsChart').getContext('2d');
+            const monthlyData = {};
+            for (let i = 0; i < 12; i++) monthlyData[new Date(0, i).toLocaleString('th-TH', { month: 'long' })] = 0;
+            data.forEach(item => { 
+                if (item['วันที่แจ้ง']) { 
+                    const d = item['วันที่แจ้ง'].split('/'); 
+                    const m = new Date(`${d[2]}-${d[1]}-${d[0]}`).toLocaleString('th-TH', { month: 'long' }); 
+                    if(monthlyData.hasOwnProperty(m)) monthlyData[m]++; 
+                }
+            });
+
+            if (myChart) myChart.destroy();
+            myChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: { labels: Object.keys(monthlyData), datasets: [{ label: 'จำนวนแจ้งซ่อม', data: Object.values(monthlyData), backgroundColor: 'rgba(99, 102, 241, 0.6)', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+            });
+
+            // 2. Pie Chart: Repair Types
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            const typeCount = {};
+            data.forEach(item => {
+                const detailText = item['รายละเอียดที่ต้องการแจ้งซ่อม'] || "";
+                // Parse Type: [Type] Details
+                const match = detailText.match(/^\[(.*?)\]/);
+                const type = match ? match[1] : "อื่นๆ";
+                typeCount[type] = (typeCount[type] || 0) + 1;
+            });
+            if (typeChart) typeChart.destroy();
+            typeChart = new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(typeCount),
+                    datasets: [{
+                        data: Object.values(typeCount),
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } } }
+            });
+
+            // 3. Pie Chart: Locations
+            const locCtx = document.getElementById('locationChart').getContext('2d');
+            const locCount = {};
+            const knownBuildings = [
+                "อาคาร 1", "อาคาร 2", "อาคาร 3", "อาคาร 4", "อาคาร 5", "อาคาร 6", "อาคาร 7", "อาคาร 8",
+                "อาคารลานสายน้ำผึ้ง", "อาคารหลังคาเอนกประสงค์", "อาคารโรงอาหาร", "อาคารศูนย์บ่มเพาะ"
+            ];
+            
+            data.forEach(item => {
+                const fullLoc = item['อุปกรณ์หรือจุดที่แจ้งซ่อม'] || "";
+                let building = "อื่นๆ";
+                for (const b of knownBuildings) {
+                    if (fullLoc.startsWith(b)) {
+                        building = b;
+                        break;
+                    }
+                }
+                locCount[building] = (locCount[building] || 0) + 1;
+            });
+            
+            if (locationChart) locationChart.destroy();
+            locationChart = new Chart(locCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(locCount),
+                    datasets: [{
+                        data: Object.values(locCount),
+                        backgroundColor: ['#3b82f6', '#0ea5e9', '#06b6d4', '#14b8a6', '#22c55e', '#84cc16', '#eab308', '#f97316', '#f43f5e', '#d946ef', '#8b5cf6', '#64748b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+        
+        function resetButtonState() {
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.innerHTML = '🚀 ส่งเรื่องแจ้งซ่อม';
+            submitBtn.disabled = false;
+        }
+        
+        function handleFileDrop(e) { e.preventDefault(); dropZone.classList.remove('dragover'); processFiles(Array.from(e.dataTransfer.files)); }
+        function handleFileSelect(e) { processFiles(Array.from(e.target.files)); }
+
+        function processFiles(newFiles) {
+            if ((fileStore.length + newFiles.length) > MAX_FILES) { Swal.fire('คำเตือน', `สามารถแนบได้สูงสุด ${MAX_FILES} ภาพเท่านั้น`, 'warning'); return; }
+            newFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) { fileStore.push({ fileName: file.name, fileType: file.type, fileData: e.target.result }); renderFileNameDisplay(); };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderFileNameDisplay() {
+            const container = document.getElementById('file-name-display'); container.innerHTML = '';
+            container.className = 'grid grid-cols-1 gap-4 mt-4 justify-items-center'; 
+            if (fileStore.length === 0) { container.className = 'hidden'; return; }
+            
+            fileStore.forEach((file, index) => {
+                const div = document.createElement('div');
+                div.className = 'relative group border border-slate-200 rounded-xl overflow-hidden shadow-sm bg-white w-full max-w-xs';
+                if (file.fileType.startsWith('image/')) {
+                    div.innerHTML = `<div class="aspect-video w-full"><img src="${file.fileData}" class="w-full h-full object-cover"></div><div class="absolute top-2 right-2"><button type="button" class="bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg transition transform hover:scale-110" onclick="window.removeFile(${index})"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><div class="px-3 py-2 bg-white text-xs text-slate-500 truncate border-t border-slate-100">${file.fileName}</div>`;
+                } else {
+                    div.innerHTML = `<div class="p-4 flex items-center gap-3"><div class="p-2 bg-slate-100 rounded-lg text-slate-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div><span class="text-sm text-slate-700 truncate flex-1">${file.fileName}</span><button type="button" class="text-red-400 hover:text-red-600" onclick="window.removeFile(${index})"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>`;
+                }
+                container.appendChild(div);
+            });
+        }
+        window.removeFile = (idx) => { fileStore.splice(idx, 1); renderFileNameDisplay(); };
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-btn');
+            const inputs = ['fullName', 'position', 'repairType', 'location_building', 'location_room', 'details'];
+            if(inputs.some(id => !document.getElementById(id).value)) { Swal.fire('คำเตือน', 'กรุณากรอกข้อมูลให้ครบถ้วน', 'warning'); return; }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังส่งข้อมูล...';
+
+            showLoader('กำลังส่งข้อมูล...');
+            
+            let formObject = Object.fromEntries(new FormData(repairForm).entries()); 
+            formObject.address = formObject.location_building + ' ' + formObject.location_room;
+            
+            delete formObject['file-upload'];
+            formObject.fileData = fileStore.length > 0 ? fileStore.map(f => ({ name: f.fileName, type: f.fileType, data: f.fileData })) : [];
+            
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ!', html: `<div class="text-slate-600">เลขที่อ้างอิงของคุณคือ</div><div class="text-2xl font-bold text-indigo-600 mt-2">${res.referenceId}</div>`, confirmButtonText: 'ตกลง', confirmButtonColor: '#4f46e5' }).then(() => { 
+                        repairForm.reset(); 
+                        fileStore = []; 
+                        renderFileNameDisplay(); 
+                        resetButtonState(); 
+                        loadDashboardAndUserData(); 
+                        document.querySelector("#requestDate")._flatpickr.setDate('today'); 
+                    });
+                } else { 
+                    Swal.fire('ข้อผิดพลาด', res.message, 'error'); 
+                    resetButtonState(); 
+                }
+            }).withFailureHandler(err => {
+                Swal.close();
+                Swal.fire('ข้อผิดพลาด', err.message, 'error');
+                resetButtonState(); 
+            }).submitRepairForm(formObject);
+        }
+
+        function renderUserStatusTable() {
+            const status = document.getElementById('user-filter-status').value, search = document.getElementById('user-search-ref-id').value.toLowerCase();
+            const filtered = allRepairs.filter(i => (status ? i['สถานะการดำเนินการ'] === status : true) && (search ? i['เลขที่อ้างอิง'].toLowerCase().includes(search) : true));
+            renderTable('user-status-table-body', filtered, currentPageUser, 'user');
+        }
+
+        function renderAdminTable() {
+            const status = document.getElementById('admin-filter-status').value, search = document.getElementById('admin-search-ref-id').value.toLowerCase();
+            const filtered = allRepairs.filter(i => (status ? i['สถานะการดำเนินการ'] === status : true) && (search ? i['เลขที่อ้างอิง'].toLowerCase().includes(search) : true));
+            renderTable('admin-table-body', filtered, currentPageAdmin, 'admin');
+        }
+
+        function renderTable(tbodyId, data, page, type) {
+            const tbody = document.getElementById(tbodyId), start = (page - 1) * rowsPerPage, paged = data.slice(start, start + rowsPerPage);
+            tbody.innerHTML = '';
+            if (paged.length === 0) { tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-slate-400">ไม่พบข้อมูล</td></tr>`; return; }
+            paged.forEach(item => {
+                const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50 transition border-b border-slate-100';
+                
+                let statusClass = 'bg-slate-100 text-slate-600';
+                if (item['สถานะการดำเนินการ'] === 'ดำเนินการแล้ว') statusClass = 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+                else if (item['สถานะการดำเนินการ'] === 'อยู่ระหว่างดำเนินการ') statusClass = 'bg-amber-100 text-amber-700 border border-amber-200';
+                else if (item['สถานะการดำเนินการ'] === 'ยังไม่ดำเนินการ') statusClass = 'bg-rose-100 text-rose-700 border border-rose-200';
+                
+                const badge = `<span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${statusClass}">${item['สถานะการดำเนินการ']}</span>`;
+                
+                if (type === 'user') {
+                    tr.innerHTML = `<td class="px-6 py-4 text-sm text-slate-600">${item['วันที่แจ้ง']}</td><td class="px-6 py-4 text-sm font-medium text-indigo-600">${item['เลขที่อ้างอิง']}</td><td class="px-6 py-4 text-sm">${badge}</td><td class="px-6 py-4 text-sm text-slate-500 max-w-xs truncate">${item['หมายเหตุ'] || '-'}</td>`;
+                } else {
+                    const files = item['ลิงก์หลักฐาน'] ? item['ลิงก์หลักฐาน'].split(',').map((url, i) => `<a href="${url.trim()}" target="_blank" class="text-blue-500 hover:underline">📄 ไฟล์ ${i+1}</a>`).join(' ') : '-';
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 text-sm whitespace-nowrap text-slate-600">${item['วันที่แจ้ง']}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700 font-medium">${item['ชื่อ-นามสกุล']}</td>
+                        <td class="px-4 py-3 text-sm text-slate-600 max-w-xs truncate" title="${item['อุปกรณ์หรือจุดที่แจ้งซ่อม']}">${item['อุปกรณ์หรือจุดที่แจ้งซ่อม']}</td>
+                        <td class="px-4 py-3 text-sm text-slate-600">${formatPhoneNumber(item['เบอร์โทรศัพท์'])}</td>
+                        <td class="px-4 py-3 text-sm text-slate-500 max-w-xs truncate" title="${item['รายละเอียดที่ต้องการแจ้งซ่อม']}">${item['รายละเอียดที่ต้องการแจ้งซ่อม']}</td>
+                        <td class="px-4 py-3 text-sm">${files}</td>
+                        <td class="px-4 py-3 text-sm">${badge}</td>
+                        <td class="px-4 py-3 text-sm space-x-1 whitespace-nowrap">
+                            <button class="text-indigo-600 hover:text-indigo-800 font-medium bg-indigo-50 px-2 py-1 rounded hover:bg-indigo-100 transition" onclick="window.manageRepair(${item.rowNumber}, '${item['สถานะการดำเนินการ']}', '${item['หมายเหตุ'] || ''}')">แก้ไข</button>
+                            <button class="text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded hover:bg-red-100 transition" onclick="window.deleteRepair(${item.rowNumber}, '${item['ID หลักฐาน']}')">ลบ</button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+            renderPagination(type, data.length, page);
+        }
+
+        function renderPagination(type, total, current) {
+            const div = document.getElementById(type + '-pagination-controls'), totalPages = Math.ceil(total / rowsPerPage);
+            if (totalPages <= 1) { div.innerHTML = ''; return; }
+            div.innerHTML = `
+                <button class="px-3 py-1 border border-slate-200 rounded-md hover:bg-slate-50 text-slate-600 disabled:opacity-50" ${current === 1 ? 'disabled' : ''} onclick="window.changePage('${type}', ${current - 1})">Previous</button>
+                <span class="text-sm text-slate-600 font-medium">หน้า ${current} / ${totalPages}</span>
+                <button class="px-3 py-1 border border-slate-200 rounded-md hover:bg-slate-50 text-slate-600 disabled:opacity-50" ${current === totalPages ? 'disabled' : ''} onclick="window.changePage('${type}', ${current + 1})">Next</button>
+            `;
+        }
+
+        window.changePage = (type, page) => { if (type === 'user') { currentPageUser = page; renderUserStatusTable(); } else { currentPageAdmin = page; renderAdminTable(); }};
+
+        window.manageRepair = async (row, status, note) => {
+            const { value } = await Swal.fire({
+                title: '<h3 class="text-xl font-bold text-slate-700">อัปเดตสถานะงานซ่อม</h3>',
+                html: `
+                    <div class="flex flex-col text-left space-y-4 px-1 mt-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1">สถานะการดำเนินการ</label>
+                            <div class="relative">
+                                <select id="swal-status" class="appearance-none block w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base text-slate-700">
+                                    <option value="ยังไม่ดำเนินการ" ${status === 'ยังไม่ดำเนินการ' ? 'selected' : ''}>🔴 ยังไม่ดำเนินการ</option>
+                                    <option value="อยู่ระหว่างดำเนินการ" ${status === 'อยู่ระหว่างดำเนินการ' ? 'selected' : ''}>🟡 อยู่ระหว่างดำเนินการ</option>
+                                    <option value="ดำเนินการแล้ว" ${status === 'ดำเนินการแล้ว' ? 'selected' : ''}>🟢 ดำเนินการแล้ว</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-1">หมายเหตุ / บันทึกเพิ่มเติม</label>
+                            <textarea id="swal-note" rows="3" class="block w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 placeholder-slate-400" placeholder="ระบุรายละเอียด...">${note}</textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true, confirmButtonText: 'บันทึกข้อมูล', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#4f46e5', cancelButtonColor: '#94a3b8', reverseButtons: true,
+                customClass: { popup: 'rounded-2xl shadow-2xl', title: 'font-kanit' },
+                preConfirm: () => [document.getElementById('swal-status').value, document.getElementById('swal-note').value]
+            });
+            if (value) { 
+                showLoader('กำลังบันทึก...'); 
+                google.script.run.withSuccessHandler(res => { 
+                    Swal.fire({ icon: 'success', title: 'บันทึกสำเร็จ', showConfirmButton: false, timer: 1500 }); 
+                    loadAdminData(); 
+                }).withFailureHandler(err => Swal.fire('Error', err.message, 'error')).updateRepairStatusAndNotes(row, value[0], value[1]); 
+            }
+        };
+
+        window.deleteRepair = (row, fileIds) => {
+            Swal.fire({ title: 'ยืนยันการลบ?', text: "ข้อมูลจะถูกลบถาวร", icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', cancelButtonColor: '#94a3b8', confirmButtonText: 'ลบเลย' }).then((result) => { 
+                if (result.isConfirmed) { 
+                    showLoader('กำลังลบ...'); 
+                    google.script.run.withSuccessHandler(() => { 
+                        Swal.close(); 
+                        loadAdminData(); 
+                    }).deleteRepair(row, fileIds); 
+                }
+            });
+        };
+
+        function showPrintModal() { flatpickr("#start-date", { dateFormat: "d/m/Y", defaultDate: "today", locale: "th" }); flatpickr("#end-date", { dateFormat: "d/m/Y", defaultDate: "today", locale: "th" }); document.getElementById('print-modal').classList.remove('hidden'); }
+        function handlePrint() {
+            const sVal = document.getElementById('start-date').value.split('/'), eVal = document.getElementById('end-date').value.split('/');
+            const sDate = new Date(`${sVal[2]}-${sVal[1]}-${sVal[0]}`), eDate = new Date(`${eVal[2]}-${eVal[1]}-${eVal[0]}`); sDate.setHours(0,0,0,0); eDate.setHours(23,59,59,999);
+            const status = document.getElementById('print-filter-status').value;
+            const printData = allRepairs.filter(i => { if (!i['วันที่แจ้ง']) return false; const d = i['วันที่แจ้ง'].split('/'); const date = new Date(`${d[2]}-${d[1]}-${d[0]}`); return (!status || i['สถานะการดำเนินการ'] === status) && (date >= sDate && date <= eDate); });
+            const rows = printData.length ? printData.map(i => `<tr><td>${i['วันที่แจ้ง']}</td><td>${i['ชื่อ-นามสกุล']}</td><td>${i['อุปกรณ์หรือจุดที่แจ้งซ่อม']}</td><td>${i['สถานะการดำเนินการ']}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center;">ไม่พบข้อมูล</td></tr>`;
+            document.getElementById('print-area').innerHTML = `<h1 class="print-header">รายงานการแจ้งซ่อม</h1><h2 style="text-align:center;font-family:'Sarabun';margin-bottom:1rem;">${document.getElementById('start-date').value} - ${document.getElementById('end-date').value}</h2><table class="print-table"><thead><tr><th>วันที่</th><th>ชื่อ</th><th>จุดที่ซ่อม</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table>`;
+            document.getElementById('print-modal').classList.add('hidden'); document.getElementById('print-area').classList.remove('hidden'); window.print(); document.getElementById('print-area').classList.add('hidden');
+        }
+    });
+    </script>
+</body>
+</html>

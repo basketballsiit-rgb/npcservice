@@ -1,0 +1,321 @@
+// --- CONFIGURATION ---
+const SHEET_NAME = "เรื่องแจ้งซ่อมแซม";
+const FOLDER_NAME = "ไฟล์หลักฐานแจ้งซ่อม";
+const ADMIN_SHEET_NAME = "AdminUsers";
+
+// LINE Messaging API Config (อย่าลืมใส่ Token และ Group ID เดิมของคุณ)
+const CHANNEL_ACCESS_TOKEN = "cabR6U86yHWSaQcYKaFzuR5b4+YJ5ZHlie9IlAfj+3Dg2jzKTdNd6+u8PVVkaX28xU1asucvn6WzzVBUUJ7Ro6QyHPiSQA8I7h+af1UiUBs2KLSZVFGNalnuaoxKh1NffMjtOj/qno5AbgjKpvmkFQdB04t89/1O/w1cDnyilFU="; 
+const TARGET_ID = "C6e6890ddf619793273e9f4df4fc0ef18"; 
+
+/**
+ * Serves the HTML file for the web app.
+ */
+function doGet(e) {
+  checkAndSetup(); 
+  const htmlOutput = HtmlService.createTemplateFromFile('index').evaluate();
+  htmlOutput
+    .setTitle("ระบบแจ้งซ่อม งานอาคารสถานที่ วิทยาลัยสารพัดช่างน่าน")
+    .setFaviconUrl('https://img2.pic.in.th/pic/Logo-.641ef5fae2216b71.png')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
+  return htmlOutput;
+}
+
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
+
+function checkAndSetup() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // 1. Sheet แจ้งซ่อม (เพิ่มคอลัมน์ประเภทการซ่อม ถ้าต้องการเก็บลง Sheet ด้วย ต้องแก้ Header ตรงนี้)
+  // *หมายเหตุ: โค้ดนี้จะบันทึก 'ประเภทการซ่อม' รวมไปกับ 'รายละเอียด' หรือเพิ่มคอลัมน์ใหม่ก็ได้
+  // ในเวอร์ชันนี้ผมจะเอาไปแปะรวมกับ "รายละเอียด" เพื่อไม่ต้องรื้อโครงสร้าง Sheet เดิมมากนัก
+  let sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_NAME);
+    const headers = [
+      "เลขที่อ้างอิง", "วันที่แจ้ง", "สถานะการดำเนินการ", "ชื่อ-นามสกุล",
+      "ตำแหน่ง", "เบอร์โทรศัพท์", "ต้องการให้ติดต่อกลับ", "อุปกรณ์หรือจุดที่แจ้งซ่อม",
+      "รายละเอียดที่ต้องการแจ้งซ่อม", "ID หลักฐาน", "ลิงก์หลักฐาน", "หมายเหตุ"
+    ];
+    sheet.appendRow(headers);
+    sheet.getRange("A1:L1").setFontWeight("bold");
+    sheet.setFrozenRows(1);
+  }
+
+  // 2. Sheet AdminUsers
+  let adminSheet = ss.getSheetByName(ADMIN_SHEET_NAME);
+  if (!adminSheet) {
+    adminSheet = ss.insertSheet(ADMIN_SHEET_NAME);
+    adminSheet.appendRow(["Username", "Password"]); 
+    adminSheet.appendRow(["admin", "1234"]); 
+    adminSheet.getRange("A1:B1").setFontWeight("bold");
+    adminSheet.setFrozenRows(1);
+  }
+
+  // 3. Folder
+  const folders = DriveApp.getFoldersByName(FOLDER_NAME);
+  if (!folders.hasNext()) {
+    DriveApp.createFolder(FOLDER_NAME);
+  }
+}
+
+function sendLineMessageApi(messageText, imageUrl) {
+  try {
+    const url = "https://api.line.me/v2/bot/message/push";
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + CHANNEL_ACCESS_TOKEN
+    };
+    
+    let messages = [{ "type": "text", "text": messageText }];
+
+    if (imageUrl) {
+       let fileId = "";
+       if (imageUrl.indexOf("/d/") > -1) {
+           const match = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+           if (match) fileId = match[1];
+       } else if (imageUrl.indexOf("id=") > -1) {
+           const match = imageUrl.match(/id=([a-zA-Z0-9_-]+)/);
+           if (match) fileId = match[1];
+       }
+
+       if (fileId) {
+          const directUrl = "https://lh3.googleusercontent.com/d/" + fileId;
+          messages.push({
+            "type": "image",
+            "originalContentUrl": directUrl,
+            "previewImageUrl": directUrl
+          });
+       } else {
+          messages.push({ "type": "text", "text": "📷 ดูรูปภาพแนบ: " + imageUrl });
+       }
+    }
+
+    // ปุ่มเข้าสู่ระบบ
+    const webAppUrl = ScriptApp.getService().getUrl();
+    messages.push({
+      "type": "flex",
+      "altText": "เข้าสู่ระบบจัดการ",
+      "contents": {
+        "type": "bubble",
+        "body": {
+          "type": "box",
+          "layout": "vertical",
+          "contents": [
+            {
+              "type": "button",
+              "action": { "type": "uri", "label": "🔐 เข้าสู่ระบบ Admin", "uri": webAppUrl },
+              "style": "primary",
+              "color": "#06c755",
+              "height": "sm"
+            }
+          ],
+          "paddingAll": "md"
+        }
+      }
+    });
+
+    const payload = {
+      "to": TARGET_ID,
+      "messages": messages
+    };
+
+    const options = {
+      "method": "post",
+      "headers": headers,
+      "payload": JSON.stringify(payload),
+      "muteHttpExceptions": true
+    };
+
+    UrlFetchApp.fetch(url, options);
+    
+  } catch (e) {
+    Logger.log("Error sending LINE API: " + e.toString());
+  }
+}
+
+function submitRepairForm(formObject) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const folders = DriveApp.getFoldersByName(FOLDER_NAME);
+    let folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(FOLDER_NAME);
+
+    let fileIds = [];
+    let fileUrls = [];
+    if (formObject.fileData && Array.isArray(formObject.fileData) && formObject.fileData.length > 0) {
+      formObject.fileData.forEach((fileInfo) => {
+        const decodedData = Utilities.base64Decode(fileInfo.data.split(',')[1]);
+        const blob = Utilities.newBlob(decodedData, fileInfo.type, fileInfo.name);
+        const file = folder.createFile(blob);
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        fileIds.push(file.getId());
+        fileUrls.push(file.getUrl());
+      });
+    }
+    
+    const referenceId = `BD-${new Date().getTime()}`;
+    
+    // รวมประเภทการซ่อมไว้ในช่องรายละเอียด เพื่อไม่ต้องแก้โครงสร้าง Sheet
+    const fullDetails = `[${formObject.repairType}] ${formObject.details}`;
+
+    const rowData = [
+      referenceId, new Date(formObject.requestDate), "ยังไม่ดำเนินการ",
+      formObject.fullName, formObject.position, formObject.phone,
+      formObject.contactBack, formObject.address, fullDetails, // ใช้ fullDetails แทน details เดิม
+      fileIds.join(', '), fileUrls.join(', '), "-"
+    ];
+    sheet.appendRow(rowData);
+
+    // --- ส่งแจ้งเตือน LINE (เพิ่มประเภทการซ่อม) ---
+    try {
+      let notifyMsg = "📣 มีรายการแจ้งซ่อมใหม่!";
+      notifyMsg += "\n📅 " + Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm");
+      notifyMsg += "\n👤 " + formObject.fullName;
+      notifyMsg += "\n🔧 ประเภท: " + formObject.repairType; // เพิ่มตรงนี้
+      notifyMsg += "\n📍 " + formObject.address;
+      notifyMsg += "\n📝 " + formObject.details;
+      notifyMsg += "\n📞 " + formObject.phone;
+      
+      sendLineMessageApi(notifyMsg, fileUrls.length > 0 ? fileUrls[0] : null);
+    } catch (err) {
+      Logger.log("Notify Error: " + err.toString());
+    }
+    // -----------------------
+
+    return { status: 'success', message: 'แจ้งซ่อมสำเร็จ!', referenceId: referenceId };
+  } catch (error) {
+    return { status: 'error', message: `เกิดข้อผิดพลาด: ${error.toString()}` };
+  }
+}
+
+function verifyAdminLogin(username, password) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName(ADMIN_SHEET_NAME);
+    if (!sheet) return false;
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === username.trim() && String(data[i][1]).trim() === password.trim()) return true;
+    }
+    return false;
+  } catch (error) { return false; }
+}
+
+function getWebAppUrl() { return ScriptApp.getService().getUrl(); }
+
+function getRepairData() {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    if (!sheet) return [];
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    const headers = values.shift();
+    return values.map((row, index) => {
+      let obj = {};
+      headers.forEach((header, i) => {
+        obj[header] = (header === "วันที่แจ้ง" && row[i] instanceof Date) ? Utilities.formatDate(new Date(row[i]), SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone(), "dd/MM/yyyy") : row[i];
+      });
+      obj.rowNumber = index + 2;
+      return obj;
+    }).reverse();
+  } catch (error) { return []; }
+}
+
+function updateRepairStatusAndNotes(rowNumber, newStatus, newNotes) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    sheet.getRange(rowNumber, 3).setValue(newStatus);
+    sheet.getRange(rowNumber, 12).setValue(newNotes);
+    return { status: 'success', message: 'อัปเดตสถานะเรียบร้อยแล้ว' };
+  } catch (error) { return { status: 'error', message: error.toString() }; }
+}
+
+function deleteRepair(rowNumber, fileIdsString) {
+  try {
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+    if (fileIdsString) {
+        fileIdsString.split(',').map(id => id.trim()).forEach(id => { try { DriveApp.getFileById(id).setTrashed(true); } catch(e){} });
+    }
+    sheet.deleteRow(rowNumber);
+    return { status: 'success', message: 'ลบข้อมูลเรียบร้อยแล้ว' };
+  } catch (error) { return { status: 'error', message: error.toString() }; }
+}
+// --- CONFIGURATION FOR ARCHIVING ---
+const ARCHIVE_SHEET_ID = "ว15L9f7kNSjaA8A2IPRWPJMfvOn-CF8sTA0gGBhtx4hOI"; // นำ ID จากข้อ 1 มาใส่
+const ARCHIVE_THRESHOLD_DAYS = 365; // เก็บข้อมูลย้อนหลัง 365 วัน (เก่ากว่านี้ย้ายออก)
+
+/**
+ * ฟังก์ชันสำหรับย้ายข้อมูลเก่าไปเก็บที่ไฟล์ Archive
+ * แนะนำให้ตั้ง Trigger ให้รันเดือนละ 1 ครั้ง
+ */
+function autoArchiveData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(SHEET_NAME); // ชื่อ Sheet หลัก "เรื่องแจ้งซ่อมแซม"
+  
+  // เปิดไฟล์ปลายทาง (Archive)
+  const archiveSS = SpreadsheetApp.openById(ARCHIVE_SHEET_ID);
+  let archiveSheet = archiveSS.getSheetByName("Archive_Data");
+  
+  // ถ้ายังไม่มี Sheet ปลายทาง ให้สร้างใหม่และใส่ Header
+  if (!archiveSheet) {
+    archiveSheet = archiveSS.insertSheet("Archive_Data");
+    // ก๊อปปี้ Header จากต้นทางไป
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues();
+    archiveSheet.getRange(1, 1, 1, sheet.getLastColumn()).setValues(headers);
+    archiveSheet.getRange("A1:Z1").setFontWeight("bold");
+  }
+
+  const dataRange = sheet.getDataRange();
+  const data = dataRange.getValues();
+  const headers = data.shift(); // แยกหัวตารางออกเก็บไว้
+  
+  // วันที่ปัจจุบันสำหรับคำนวณความเก่า
+  const today = new Date();
+  const cutoffDate = new Date(today.getTime() - (ARCHIVE_THRESHOLD_DAYS * 24 * 60 * 60 * 1000)); // วันที่ตัดรอบ
+
+  let rowsToKeep = [];
+  let rowsToArchive = [];
+
+  // วนลูปเช็คข้อมูลทีละแถว
+  data.forEach(row => {
+    const status = row[2]; // สมมติว่าสถานะอยู่คอลัมน์ที่ 3 (Index 2)
+    const requestDate = new Date(row[1]); // สมมติว่าวันที่แจ้งอยู่คอลัมน์ที่ 2 (Index 1)
+
+    // เงื่อนไขการย้าย: สถานะต้องเป็น "ดำเนินการแล้ว" AND วันที่เก่ากว่าที่กำหนด
+    if (status === "ดำเนินการแล้ว" && requestDate < cutoffDate) {
+      rowsToArchive.push(row);
+    } else {
+      rowsToKeep.push(row);
+    }
+  });
+
+  // ถ้าย้ายข้อมูล
+  if (rowsToArchive.length > 0) {
+    // 1. บันทึกลงไฟล์ Archive
+    archiveSheet.getRange(
+      archiveSheet.getLastRow() + 1, 
+      1, 
+      rowsToArchive.length, 
+      rowsToArchive[0].length
+    ).setValues(rowsToArchive);
+
+    // 2. ลบข้อมูลเก่าออกจากไฟล์หลัก และเขียนข้อมูลที่เหลือกลับเข้าไปใหม่
+    // (วิธีนี้เร็วกว่าการ deleteRow ทีละบรรทัดมาก)
+    
+    // เคลียร์ข้อมูลเก่าทั้งหมด (ยกเว้น Header)
+    if (sheet.getLastRow() > 1) {
+        sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).clearContent();
+    }
+    
+    // เขียนข้อมูลที่ยังไม่เก่า (rowsToKeep) กลับลงไป
+    if (rowsToKeep.length > 0) {
+        sheet.getRange(2, 1, rowsToKeep.length, rowsToKeep[0].length).setValues(rowsToKeep);
+    }
+
+    Logger.log(`Archived ${rowsToArchive.length} rows successfully.`);
+  } else {
+    Logger.log("No data to archive.");
+  }
+}
