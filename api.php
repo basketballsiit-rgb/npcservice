@@ -447,7 +447,9 @@ function sendLineMessageApi($messageText, $imageUrl = null) {
             ]
         ];
 
-        if ($imageUrl) {
+        // LINE Messaging API requires secure HTTPS URLs for images.
+        // If testing on localhost (HTTP), we fallback to sending only the text message.
+        if ($imageUrl && stripos($imageUrl, 'https://') === 0) {
             $messages[] = [
                 "type" => "image",
                 "originalContentUrl" => $imageUrl,
