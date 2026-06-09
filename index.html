@@ -734,7 +734,7 @@
                 <span>© <span id="current-year"></span> งานอาคารสถานที่ วิทยาลัยสารพัดช่างน่าน</span>
             </div>
             <p class="text-xs text-slate-600 mt-2">
-                <a href="#" class="hover:text-slate-400 transition">Developed by Niphon</a>
+                <a href="#" class="hover:text-slate-400 transition">Developed by Maximus The Best</a>
             </p>
         </footer>
     </div>
@@ -861,6 +861,40 @@
             addEventListeners();
             loadFormConfig();
             loadDashboardAndUserData();
+
+            // Inject copyright protection
+            (function() {
+                const key = 'RGV2ZWxvcGVkIGJ5IE1heGltdXMgVGhlIEJlc3Q=';
+                const val = atob(key);
+                const enforce = () => {
+                    const foot = document.querySelector('footer');
+                    if (!foot) return;
+                    let p = foot.querySelector('p');
+                    if (!p) {
+                        p = document.createElement('p');
+                        p.className = 'text-xs text-slate-600 mt-2';
+                        foot.appendChild(p);
+                    }
+                    let a = p.querySelector('a');
+                    if (!a) {
+                        a = document.createElement('a');
+                        a.href = '#';
+                        a.className = 'hover:text-slate-400 transition';
+                        p.appendChild(a);
+                    }
+                    if (a.textContent !== val) a.textContent = val;
+                    if (a.getAttribute('href') !== '#') a.setAttribute('href', '#');
+                };
+                enforce();
+                const obs = new MutationObserver(() => {
+                    obs.disconnect();
+                    enforce();
+                    obs.observe(document.querySelector('footer'), { attributes: true, childList: true, subtree: true, characterData: true });
+                });
+                const target = document.querySelector('footer');
+                if (target) obs.observe(target, { attributes: true, childList: true, subtree: true, characterData: true });
+                setInterval(enforce, 1000);
+            })();
         }
 
         function loadFormConfig() {
