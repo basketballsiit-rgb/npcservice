@@ -694,6 +694,80 @@
             return str;
         }
 
+        function loadSystemSettings() {
+            showLoader('กำลังโหลดการตั้งค่า...');
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    document.getElementById('settings-line-token').value = res.line_channel_access_token || '';
+                    document.getElementById('settings-line-target').value = res.line_target_id || '';
+                    
+                    if (res.repair_types) {
+                        document.getElementById('settings-repair-types').value = res.repair_types.join('\n');
+                    }
+                    if (res.repair_locations) {
+                        document.getElementById('settings-repair-locations').value = res.repair_locations.join('\n');
+                    }
+                } else {
+                    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: res.message || 'โหลดการตั้งค่าไม่สำเร็จ', customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+                }
+            }).withFailureHandler(err => {
+                Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: err.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+            }).getSystemSettings();
+        }
+
+        function saveSystemSettings() {
+            const token = document.getElementById('settings-line-token').value.trim();
+            const target = document.getElementById('settings-line-target').value.trim();
+            const types = document.getElementById('settings-repair-types').value.split('\n').map(t => t.trim()).filter(t => t !== '');
+            const locations = document.getElementById('settings-repair-locations').value.split('\n').map(l => l.trim()).filter(l => l !== '');
+
+            showLoader('กำลังบันทึกการตั้งค่า...');
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'บันทึกการตั้งค่าสำเร็จ', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } }).then(() => {
+                        loadFormConfig();
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: res.message || 'บันทึกไม่สำเร็จ', customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+                }
+            }).withFailureHandler(err => {
+                Swal.close();
+                Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: err.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+            }).updateSystemSettings({
+                line_channel_access_token: token,
+                line_target_id: target,
+                repair_types: types,
+                repair_locations: locations
+            });
+        }
+
+        function saveAdminPassword() {
+            const currentPass = document.getElementById('change-pass-current').value;
+            const newPass = document.getElementById('change-pass-new').value;
+            if (!currentPass || !newPass) {
+                Swal.fire({ icon: 'warning', title: 'คำเตือน', text: 'กรุณากรอกข้อมูลรหัสผ่านให้ครบถ้วน', customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+                return;
+            }
+
+            showLoader('กำลังเปลี่ยนรหัสผ่าน...');
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'เปลี่ยนรหัสผ่านสำเร็จ', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } }).then(() => {
+                        document.getElementById('change-pass-current').value = '';
+                        document.getElementById('change-pass-new').value = '';
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: res.message || 'เปลี่ยนรหัสผ่านไม่สำเร็จ', customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+                }
+            }).withFailureHandler(err => {
+                Swal.close();
+                Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: err.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+            }).changeAdminPassword(currentPass, newPass);
+        }
+
         async function showAdminLogin(e) {
             if(e) e.preventDefault();
             const { value: formValues } = await Swal.fire({
