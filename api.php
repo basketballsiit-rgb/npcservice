@@ -144,7 +144,12 @@ function submitRepairForm($formObject) {
         // Handle File Uploads (Base64)
         if (isset($formObject['fileData']) && is_array($formObject['fileData']) && count($formObject['fileData']) > 0) {
             if (!is_dir(UPLOAD_DIR)) {
-                mkdir(UPLOAD_DIR, 0755, true);
+                if (!mkdir(UPLOAD_DIR, 0755, true)) {
+                    throw new Exception("ไม่สามารถสร้างโฟลเดอร์ uploads ได้ กรุณาตรวจสอบสิทธิ์ของเว็บเซิร์ฟเวอร์");
+                }
+            }
+            if (!is_writable(UPLOAD_DIR)) {
+                throw new Exception("โฟลเดอร์ uploads ไม่มีสิทธิ์เขียนไฟล์ (Permission denied) กรุณาตั้งค่าสิทธิ์โฟลเดอร์");
             }
 
             foreach ($formObject['fileData'] as $fileInfo) {
@@ -174,6 +179,8 @@ function submitRepairForm($formObject) {
                     if (file_put_contents($targetPath, $decodedData)) {
                         $fileIds[] = md5($uniqueFileName);
                         $fileUrls[] = UPLOAD_URL . $uniqueFileName;
+                    } else {
+                        throw new Exception("ไม่สามารถเขียนไฟล์ลงในโฟลเดอร์ uploads ได้");
                     }
                 }
             }
