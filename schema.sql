@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `admin_users` (
 
 -- Seed default admin user: Username 'admin', Password '1234' (hashed)
 INSERT INTO `admin_users` (`id`, `username`, `password`) 
-VALUES (1, 'admin', '$2y$10$tZ9c22zQy8h3u0x7L5b/uOzYyvW7m9P0Jv0K2K2vU7y8H8M8y8m9q')
+VALUES (1, 'admin', '$2y$10$HdbSnkEUhcnRkOz3uQCEduJBO4vgUnBb8DYfnlMxGCs1nvDirgK9e')
 ON DUPLICATE KEY UPDATE `username`='admin';
 
 -- 2. Table structure for table `repairs`
