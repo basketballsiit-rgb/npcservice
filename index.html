@@ -575,6 +575,10 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         // --- VARIABLES ---
+        const userPage = document.getElementById('user-page');
+        const adminPage = document.getElementById('admin-page');
+        const repairForm = document.getElementById('repair-form');
+        const dropZone = document.getElementById('drop-zone');
         let allRepairs = [];
         let currentPageUser = 1, currentPageAdmin = 1;
         const rowsPerPage = 15;
