@@ -130,6 +130,17 @@
 <body class="antialiased">
 
     <div id="app" class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <!-- Top Navigation / Action Bar -->
+        <div class="flex justify-between items-center py-4 border-b border-white/5 mb-8">
+            <div class="flex items-center gap-3">
+                <img src="https://img2.pic.in.th/pic/Logo-.641ef5fae2216b71.png" alt="Logo" class="h-10 w-10 object-cover rounded-full border border-indigo-500/20">
+                <span class="font-bold text-slate-200 hidden sm:inline-block text-sm sm:text-base">งานอาคารสถานที่ วิทยาลัยสารพัดช่างน่าน</span>
+            </div>
+            <button id="admin-top-login-btn" class="px-4 py-2 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white font-bold rounded-xl border border-indigo-500/30 shadow-md transition-all duration-200 flex items-center gap-1.5 text-sm">
+                🔒 เข้าสู่ระบบ Admin
+            </button>
+        </div>
+
         <header class="text-center mb-12 mt-6">
             <div class="relative inline-block mb-4">
                 <div class="absolute inset-0 rounded-full bg-indigo-500/30 blur-xl"></div>
@@ -615,6 +626,7 @@
 
         function addEventListeners() {
             document.getElementById('admin-login-link').addEventListener('click', showAdminLogin);
+            document.getElementById('admin-top-login-btn').addEventListener('click', showAdminLogin);
             
             // Logout Session and UI Toggle
             document.getElementById('logout-btn').addEventListener('click', () => {
@@ -623,6 +635,7 @@
                     Swal.close();
                     adminPage.classList.add('hidden');
                     userPage.classList.remove('hidden');
+                    document.getElementById('admin-top-login-btn').classList.remove('hidden');
                     document.getElementById('tab-repairs-btn').click();
                     loadDashboardAndUserData();
                 }).adminLogout();
@@ -694,7 +707,10 @@
                 google.script.run.withSuccessHandler(isValid => {
                     Swal.close();
                     if (isValid) {
-                        userPage.classList.add('hidden'); adminPage.classList.remove('hidden'); loadAdminData();
+                        userPage.classList.add('hidden'); 
+                        adminPage.classList.remove('hidden'); 
+                        document.getElementById('admin-top-login-btn').classList.add('hidden');
+                        loadAdminData();
                         Swal.fire({ icon: 'success', title: 'ยินดีต้อนรับ', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
                     } else { Swal.fire({ icon: 'error', title: 'ปฏิเสธการเข้าถึง', text: 'ข้อมูลไม่ถูกต้อง', customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } }); }
                 }).withFailureHandler(err => Swal.fire({ icon: 'error', title: 'Error', text: err.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } })).verifyAdminLogin(username, password);
