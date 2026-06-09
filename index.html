@@ -365,6 +365,26 @@
             border-color: #6366f1 !important;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
         }
+
+        /* Summary bar in dark mode */
+        body:not(.light-mode) #admin-summary-bar {
+            background-color: rgba(99, 102, 241, 0.05) !important;
+            border-color: rgba(99, 102, 241, 0.15) !important;
+            color: #cbd5e1 !important;
+        }
+        body:not(.light-mode) #admin-summary-bar .bg-white {
+            background-color: rgba(30, 41, 59, 0.5) !important;
+            border-color: rgba(99, 102, 241, 0.2) !important;
+            color: #f1f5f9 !important;
+        }
+        body:not(.light-mode) #admin-summary-bar .text-indigo-800,
+        body:not(.light-mode) #admin-summary-bar .text-indigo-700 {
+            color: #a5b4fc !important; /* indigo-300 */
+        }
+        body:not(.light-mode) #admin-summary-bar .text-slate-800,
+        body:not(.light-mode) #admin-summary-bar .text-slate-600 {
+            color: #e2e8f0 !important;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -650,6 +670,11 @@
                                 <option value="">ปีการศึกษาทั้งหมด</option>
                             </select>
                             <input type="text" id="admin-search-ref-id" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="custom-input-light px-4 py-2 w-full">
+                        </div>
+
+                        <!-- Summary Bar -->
+                        <div id="admin-summary-bar" class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl text-slate-800 text-sm">
+                            <!-- Populated dynamically by renderAdminSummary() -->
                         </div>
 
                         <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white">
@@ -1522,6 +1547,52 @@
                        (search ? i['เลขที่อ้างอิง'].toLowerCase().includes(search) : true);
             });
             renderTable('admin-table-body', filtered, currentPageAdmin, 'admin');
+            renderAdminSummary(filtered);
+        }
+
+        function renderAdminSummary(data) {
+            const summaryDiv = document.getElementById('admin-summary-bar');
+            if (!summaryDiv) return;
+
+            const yearCounts = {};
+            const semesterCounts = {};
+
+            data.forEach(item => {
+                const yr = item['ปีการศึกษา'] || 'ไม่ระบุปีการศึกษา';
+                const sem = item['ภาคเรียน'] || 'ไม่ระบุภาคเรียน';
+
+                yearCounts[yr] = (yearCounts[yr] || 0) + 1;
+
+                if (!semesterCounts[yr]) semesterCounts[yr] = {};
+                semesterCounts[yr][sem] = (semesterCounts[yr][sem] || 0) + 1;
+            });
+
+            const years = Object.keys(yearCounts).sort();
+            if (years.length === 0) {
+                summaryDiv.innerHTML = '<div class="text-slate-500 font-medium">ไม่มีข้อมูลที่จะแสดงสรุปยอดรวม</div>';
+                return;
+            }
+
+            let html = '<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full">';
+            html += '<div class="flex items-center gap-2 font-bold text-indigo-800"><span class="text-lg">📊</span> สรุปยอดรวมใบแจ้งซ่อม:</div>';
+            html += '<div class="flex flex-wrap gap-3">';
+
+            years.forEach(yr => {
+                const yrTotal = yearCounts[yr];
+                html += `
+                    <div class="bg-white border border-indigo-200 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2">
+                        <span class="font-bold text-indigo-700">ปีการศึกษา ${yr}:</span>
+                        <span class="font-bold text-slate-800">${yrTotal} รายการ</span>
+                        <span class="text-slate-300">|</span>
+                `;
+                const sems = Object.keys(semesterCounts[yr]).sort();
+                const semParts = sems.map(sem => `ภาคเรียน ${sem}: ${semesterCounts[yr][sem]} รายการ`);
+                html += `<span class="text-xs text-slate-600 font-semibold">${semParts.join(', ')}</span>`;
+                html += '</div>';
+            });
+
+            html += '</div></div>';
+            summaryDiv.innerHTML = html;
         }
 
         function renderTable(tbodyId, data, page, type) {
@@ -1687,6 +1758,62 @@
             if (printSemester) filterInfo += ` | ภาคเรียนที่: ${printSemester}`;
             if (printYear) filterInfo += ` | ปีการศึกษา: ${printYear}`;
 
+            // Calculate totals from printData
+            const yearCounts = {};
+            const semesterCounts = {};
+
+            printData.forEach(item => {
+                const yr = item['ปีการศึกษา'] || 'ไม่ระบุปีการศึกษา';
+                const sem = item['ภาคเรียน'] || 'ไม่ระบุภาคเรียน';
+
+                yearCounts[yr] = (yearCounts[yr] || 0) + 1;
+
+                if (!semesterCounts[yr]) semesterCounts[yr] = {};
+                semesterCounts[yr][sem] = (semesterCounts[yr][sem] || 0) + 1;
+            });
+
+            let summaryTableHtml = '';
+            const years = Object.keys(yearCounts).sort();
+            if (years.length > 0) {
+                summaryTableHtml += `
+                    <div style="margin-top: 30px; page-break-inside: avoid; font-family: 'Sarabun';">
+                        <h3 style="font-size: 14pt; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px;">📊 สรุปยอดรวมรายงานการแจ้งซ่อม</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12pt;">
+                            <thead>
+                                <tr style="background-color: #f1f5f9;">
+                                    <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold;">ภาคเรียน / ปีการศึกษา</th>
+                                    <th style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 200px;">จำนวนรายการแจ้งซ่อม</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                years.forEach(yr => {
+                    summaryTableHtml += `
+                        <tr style="font-weight: bold; background-color: #f8fafc;">
+                            <td style="border: 1px solid #000; padding: 8px;">รวมทั้งปีการศึกษา ${yr}</td>
+                            <td style="border: 1px solid #000; padding: 8px; text-align: center;">${yearCounts[yr]} รายการ</td>
+                        </tr>
+                    `;
+
+                    const sems = Object.keys(semesterCounts[yr]).sort();
+                    sems.forEach(sem => {
+                        summaryTableHtml += `
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 8px; padding-left: 24px; color: #475569;">└─ รวมของภาคเรียนที่ ${sem}</td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: center; color: #475569;">${semesterCounts[yr][sem]} รายการ</td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                summaryTableHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
             document.getElementById('print-area').innerHTML = `
                 <h1 class="print-header">รายงานการแจ้งซ่อม (NPC SERVICE)</h1>
                 <h2 style="text-align:center;font-family:'Sarabun';margin-bottom:1rem;font-size:12pt;color:#475569;">${filterInfo}</h2>
@@ -1702,6 +1829,7 @@
                     </thead>
                     <tbody>${rows}</tbody>
                 </table>
+                ${summaryTableHtml}
             `;
             document.getElementById('print-modal').classList.add('hidden');
             document.getElementById('print-area').classList.remove('hidden');
