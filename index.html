@@ -636,14 +636,20 @@
 
                     <!-- Tab 1 Content: Repairs List -->
                     <div id="admin-repairs-content" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <select id="admin-filter-status" class="custom-input-light px-4 py-2 bg-white">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <select id="admin-filter-status" class="custom-input-light px-4 py-2 bg-white w-full">
                                 <option value="">สถานะทั้งหมด</option>
                                 <option>ยังไม่ดำเนินการ</option>
                                 <option>อยู่ระหว่างดำเนินการ</option>
                                 <option>ดำเนินการแล้ว</option>
                             </select>
-                            <input type="text" id="admin-search-ref-id" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="custom-input-light px-4 py-2">
+                            <select id="admin-filter-semester" class="custom-input-light px-4 py-2 bg-white w-full">
+                                <option value="">ภาคเรียนทั้งหมด</option>
+                            </select>
+                            <select id="admin-filter-academic-year" class="custom-input-light px-4 py-2 bg-white w-full">
+                                <option value="">ปีการศึกษาทั้งหมด</option>
+                            </select>
+                            <input type="text" id="admin-search-ref-id" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="custom-input-light px-4 py-2 w-full">
                         </div>
 
                         <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white">
@@ -655,6 +661,7 @@
                                             <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">ผู้แจ้ง</th>
                                             <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">สถานที่/ห้อง</th>
                                             <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">เบอร์โทร</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">ภาคเรียน/ปีการศึกษา</th>
                                             <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">อาการ</th>
                                             <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">หลักฐาน</th>
                                             <th class="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase">สถานะ</th>
@@ -721,6 +728,41 @@
                             </div>
                         </div>
 
+                        <!-- Semester & Academic Year Configuration -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Semester & Academic Year textareas -->
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                                <h3 class="text-lg font-bold text-indigo-600 border-b border-slate-200 pb-2">📅 ตั้งค่าข้อมูลภาคเรียน & ปีการศึกษา</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-1">รายการภาคเรียน (1 รายการต่อบรรทัด)</label>
+                                        <textarea id="settings-semesters" rows="6" class="custom-input-light w-full px-4 py-2.5 text-sm font-mono" placeholder="เช่น:&#10;1&#10;2"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-1">รายการปีการศึกษา (1 รายการต่อบรรทัด)</label>
+                                        <textarea id="settings-academic-years" rows="6" class="custom-input-light w-full px-4 py-2.5 text-sm font-mono" placeholder="เช่น:&#10;2568&#10;2569&#10;2570"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Active configurations -->
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                                <h3 class="text-lg font-bold text-indigo-600 border-b border-slate-200 pb-2">📌 เลือกภาคเรียน & ปีการศึกษาปัจจุบัน</h3>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">ภาคเรียนปัจจุบันที่เปิดใช้งาน</label>
+                                    <select id="settings-current-semester" class="custom-input-light w-full px-4 py-2.5 bg-white text-sm text-slate-800">
+                                        <!-- Will be dynamically populated -->
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-slate-700 mb-1">ปีการศึกษาปัจจุบันที่เปิดใช้งาน</label>
+                                    <select id="settings-current-academic-year" class="custom-input-light w-full px-4 py-2.5 bg-white text-sm text-slate-800">
+                                        <!-- Will be dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex justify-end pt-4 border-t border-slate-200">
                             <button id="save-settings-btn" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl hover:from-indigo-700 hover:to-violet-700 font-bold transition-all shadow-lg transform hover:scale-102">💾 บันทึกการตั้งค่าระบบ</button>
                         </div>
@@ -759,6 +801,18 @@
                             <option>ยังไม่ดำเนินการ</option>
                             <option>อยู่ระหว่างดำเนินการ</option>
                             <option>ดำเนินการแล้ว</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">ภาคเรียน</label>
+                        <select id="print-filter-semester" class="custom-input-light w-full px-4 py-2 bg-white text-slate-800">
+                            <option value="">ทั้งหมด</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">ปีการศึกษา</label>
+                        <select id="print-filter-academic-year" class="custom-input-light w-full px-4 py-2 bg-white text-slate-800">
+                            <option value="">ทั้งหมด</option>
                         </select>
                     </div>
                 </div>
@@ -902,25 +956,99 @@
                 if (res.status === 'success') {
                     // Populate Repair Types
                     const typeSelect = document.getElementById('repairType');
-                    typeSelect.innerHTML = '<option value="" disabled selected class="text-gray-400">-- เลือกประเภท --</option>';
-                    res.repair_types.forEach(type => {
-                        const option = document.createElement('option');
-                        option.value = type;
-                        option.textContent = type;
-                        typeSelect.appendChild(option);
-                    });
+                    if (typeSelect) {
+                        typeSelect.innerHTML = '<option value="" disabled selected class="text-gray-400">-- เลือกประเภท --</option>';
+                        res.repair_types.forEach(type => {
+                            const option = document.createElement('option');
+                            option.value = type;
+                            option.textContent = type;
+                            typeSelect.appendChild(option);
+                        });
+                    }
 
                     // Populate Locations
                     const locationSelect = document.getElementById('location_building');
-                    locationSelect.innerHTML = '<option value="" disabled selected class="text-gray-400">-- เลือกอาคาร/สถานที่ --</option>';
-                    res.repair_locations.forEach(loc => {
-                        const option = document.createElement('option');
-                        option.value = loc;
-                        option.textContent = loc;
-                        locationSelect.appendChild(option);
+                    if (locationSelect) {
+                        locationSelect.innerHTML = '<option value="" disabled selected class="text-gray-400">-- เลือกอาคาร/สถานที่ --</option>';
+                        res.repair_locations.forEach(loc => {
+                            const option = document.createElement('option');
+                            option.value = loc;
+                            option.textContent = loc;
+                            locationSelect.appendChild(option);
+                        });
+                    }
+
+                    // Populate Semester Filters
+                    const semFilters = [document.getElementById('admin-filter-semester'), document.getElementById('print-filter-semester')];
+                    semFilters.forEach(select => {
+                        if (select) {
+                            select.innerHTML = '<option value="">ภาคเรียนทั้งหมด</option>';
+                            if (res.semesters) {
+                                res.semesters.forEach(sem => {
+                                    const option = document.createElement('option');
+                                    option.value = sem;
+                                    option.textContent = 'ภาคเรียนที่ ' + sem;
+                                    select.appendChild(option);
+                                });
+                            }
+                        }
+                    });
+
+                    // Populate Academic Year Filters
+                    const yearFilters = [document.getElementById('admin-filter-academic-year'), document.getElementById('print-filter-academic-year')];
+                    yearFilters.forEach(select => {
+                        if (select) {
+                            select.innerHTML = '<option value="">ปีการศึกษาทั้งหมด</option>';
+                            if (res.academic_years) {
+                                res.academic_years.forEach(year => {
+                                    const option = document.createElement('option');
+                                    option.value = year;
+                                    option.textContent = 'ปีการศึกษา ' + year;
+                                    select.appendChild(option);
+                                });
+                            }
+                        }
                     });
                 }
             }).getFormConfig();
+        }
+
+        function updateActiveSemesterDropdown() {
+            const activeSelect = document.getElementById('settings-current-semester');
+            if (!activeSelect) return;
+            const currentValue = activeSelect.value;
+            const semestersTextarea = document.getElementById('settings-semesters');
+            if (!semestersTextarea) return;
+            const list = semestersTextarea.value.split('\n').map(x => x.trim()).filter(x => x !== '');
+            activeSelect.innerHTML = '';
+            list.forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = 'ภาคเรียนที่ ' + val;
+                activeSelect.appendChild(opt);
+            });
+            if (list.includes(currentValue)) {
+                activeSelect.value = currentValue;
+            }
+        }
+
+        function updateActiveYearDropdown() {
+            const activeSelect = document.getElementById('settings-current-academic-year');
+            if (!activeSelect) return;
+            const currentValue = activeSelect.value;
+            const yearsTextarea = document.getElementById('settings-academic-years');
+            if (!yearsTextarea) return;
+            const list = yearsTextarea.value.split('\n').map(x => x.trim()).filter(x => x !== '');
+            activeSelect.innerHTML = '';
+            list.forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = 'ปีการศึกษา ' + val;
+                activeSelect.appendChild(opt);
+            });
+            if (list.includes(currentValue)) {
+                activeSelect.value = currentValue;
+            }
         }
 
         function addEventListeners() {
@@ -967,7 +1095,15 @@
             document.getElementById('user-filter-status').addEventListener('change', () => { currentPageUser = 1; renderUserStatusTable(); });
             document.getElementById('user-search-ref-id').addEventListener('keyup', () => { currentPageUser = 1; renderUserStatusTable(); });
             document.getElementById('admin-filter-status').addEventListener('change', () => { currentPageAdmin = 1; renderAdminTable(); });
+            document.getElementById('admin-filter-semester').addEventListener('change', () => { currentPageAdmin = 1; renderAdminTable(); });
+            document.getElementById('admin-filter-academic-year').addEventListener('change', () => { currentPageAdmin = 1; renderAdminTable(); });
             document.getElementById('admin-search-ref-id').addEventListener('keyup', () => { currentPageAdmin = 1; renderAdminTable(); });
+
+            // Settings Textarea sync listeners
+            const semestersTextarea = document.getElementById('settings-semesters');
+            const yearsTextarea = document.getElementById('settings-academic-years');
+            if (semestersTextarea) semestersTextarea.addEventListener('input', updateActiveSemesterDropdown);
+            if (yearsTextarea) yearsTextarea.addEventListener('input', updateActiveYearDropdown);
 
             document.getElementById('print-report-btn').addEventListener('click', showPrintModal);
             document.getElementById('cancel-print-btn').addEventListener('click', () => document.getElementById('print-modal').classList.add('hidden'));
@@ -1021,6 +1157,23 @@
                     if (res.repair_locations) {
                         document.getElementById('settings-repair-locations').value = res.repair_locations.join('\n');
                     }
+                    if (res.semesters) {
+                        document.getElementById('settings-semesters').value = res.semesters.join('\n');
+                    }
+                    if (res.academic_years) {
+                        document.getElementById('settings-academic-years').value = res.academic_years.join('\n');
+                    }
+                    
+                    // Trigger dropdown rebuild to make sure active settings lists are up to date
+                    updateActiveSemesterDropdown();
+                    updateActiveYearDropdown();
+                    
+                    if (res.current_semester) {
+                        document.getElementById('settings-current-semester').value = res.current_semester;
+                    }
+                    if (res.current_academic_year) {
+                        document.getElementById('settings-current-academic-year').value = res.current_academic_year;
+                    }
                 } else {
                     Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: res.message || 'โหลดการตั้งค่าไม่สำเร็จ', customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
                 }
@@ -1034,6 +1187,10 @@
             const target = document.getElementById('settings-line-target').value.trim();
             const types = document.getElementById('settings-repair-types').value.split('\n').map(t => t.trim()).filter(t => t !== '');
             const locations = document.getElementById('settings-repair-locations').value.split('\n').map(l => l.trim()).filter(l => l !== '');
+            const semesters = document.getElementById('settings-semesters').value.split('\n').map(s => s.trim()).filter(s => s !== '');
+            const years = document.getElementById('settings-academic-years').value.split('\n').map(y => y.trim()).filter(y => y !== '');
+            const currentSemester = document.getElementById('settings-current-semester').value;
+            const currentAcademicYear = document.getElementById('settings-current-academic-year').value;
 
             showLoader('กำลังบันทึกการตั้งค่า...');
             google.script.run.withSuccessHandler(res => {
@@ -1052,7 +1209,11 @@
                 line_channel_access_token: token,
                 line_target_id: target,
                 repair_types: types,
-                repair_locations: locations
+                repair_locations: locations,
+                current_semester: currentSemester,
+                current_academic_year: currentAcademicYear,
+                semesters: semesters,
+                academic_years: years
             });
         }
 
@@ -1349,8 +1510,17 @@
         }
 
         function renderAdminTable() {
-            const status = document.getElementById('admin-filter-status').value, search = document.getElementById('admin-search-ref-id').value.toLowerCase();
-            const filtered = allRepairs.filter(i => (status ? i['สถานะการดำเนินการ'] === status : true) && (search ? i['เลขที่อ้างอิง'].toLowerCase().includes(search) : true));
+            const status = document.getElementById('admin-filter-status').value;
+            const search = document.getElementById('admin-search-ref-id').value.toLowerCase();
+            const semester = document.getElementById('admin-filter-semester').value;
+            const year = document.getElementById('admin-filter-academic-year').value;
+
+            const filtered = allRepairs.filter(i => {
+                return (status ? i['สถานะการดำเนินการ'] === status : true) &&
+                       (semester ? i['ภาคเรียน'] === semester : true) &&
+                       (year ? i['ปีการศึกษา'] === year : true) &&
+                       (search ? i['เลขที่อ้างอิง'].toLowerCase().includes(search) : true);
+            });
             renderTable('admin-table-body', filtered, currentPageAdmin, 'admin');
         }
 
@@ -1385,11 +1555,13 @@
                     tr.innerHTML = `<td class="px-6 py-4 text-sm text-slate-400">${item['วันที่แจ้ง']}</td><td class="px-6 py-4 text-sm font-semibold text-indigo-400">${item['เลขที่อ้างอิง']}</td><td class="px-6 py-4 text-sm">${badge}</td><td class="px-6 py-4 text-sm text-slate-400 max-w-xs truncate">${item['หมายเหตุ'] || '-'}</td>`;
                 } else {
                     const files = item['ลิงก์หลักฐาน'] ? item['ลิงก์หลักฐาน'].split(',').map((url, i) => `<a href="${url.trim()}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-semibold hover:underline">📄 ไฟล์ ${i+1}</a>`).join(' ') : '-';
+                    const semYear = (item['ภาคเรียน'] && item['ปีการศึกษา']) ? `${item['ภาคเรียน']}/${item['ปีการศึกษา']}` : (item['ภาคเรียน'] || item['ปีการศึกษา'] || '-');
                     tr.innerHTML = `
                         <td class="px-4 py-3 text-sm whitespace-nowrap text-slate-500">${item['วันที่แจ้ง']}</td>
                         <td class="px-4 py-3 text-sm text-slate-900 font-semibold">${item['ชื่อ-นามสกุล']}</td>
                         <td class="px-4 py-3 text-sm text-slate-700 max-w-xs truncate" title="${item['อุปกรณ์หรือจุดที่แจ้งซ่อม']}">${item['อุปกรณ์หรือจุดที่แจ้งซ่อม']}</td>
                         <td class="px-4 py-3 text-sm text-slate-600">${formatPhoneNumber(item['เบอร์โทรศัพท์'])}</td>
+                        <td class="px-4 py-3 text-sm text-slate-600 whitespace-nowrap">${semYear}</td>
                         <td class="px-4 py-3 text-sm text-slate-600 max-w-xs truncate" title="${item['รายละเอียดที่ต้องการแจ้งซ่อม']}">${item['รายละเอียดที่ต้องการแจ้งซ่อม']}</td>
                         <td class="px-4 py-3 text-sm">${files}</td>
                         <td class="px-4 py-3 text-sm">${badge}</td>
@@ -1486,10 +1658,55 @@
             const sVal = document.getElementById('start-date').value.split('/'), eVal = document.getElementById('end-date').value.split('/');
             const sDate = new Date(`${sVal[2]}-${sVal[1]}-${sVal[0]}`), eDate = new Date(`${eVal[2]}-${eVal[1]}-${eVal[0]}`); sDate.setHours(0,0,0,0); eDate.setHours(23,59,59,999);
             const status = document.getElementById('print-filter-status').value;
-            const printData = allRepairs.filter(i => { if (!i['วันที่แจ้ง']) return false; const d = i['วันที่แจ้ง'].split('/'); const date = new Date(`${d[2]}-${d[1]}-${d[0]}`); return (!status || i['สถานะการดำเนินการ'] === status) && (date >= sDate && date <= eDate); });
-            const rows = printData.length ? printData.map(i => `<tr><td>${i['วันที่แจ้ง']}</td><td>${i['ชื่อ-นามสกุล']}</td><td>${i['อุปกรณ์หรือจุดที่แจ้งซ่อม']}</td><td>${i['สถานะการดำเนินการ']}</td></tr>`).join('') : `<tr><td colspan="4" style="text-align:center;">ไม่พบข้อมูล</td></tr>`;
-            document.getElementById('print-area').innerHTML = `<h1 class="print-header">รายงานการแจ้งซ่อม</h1><h2 style="text-align:center;font-family:'Sarabun';margin-bottom:1rem;">${document.getElementById('start-date').value} - ${document.getElementById('end-date').value}</h2><table class="print-table"><thead><tr><th>วันที่</th><th>ชื่อ</th><th>จุดที่ซ่อม</th><th>สถานะ</th></tr></thead><tbody>${rows}</tbody></table>`;
-            document.getElementById('print-modal').classList.add('hidden'); document.getElementById('print-area').classList.remove('hidden'); window.print(); document.getElementById('print-area').classList.add('hidden');
+            const printSemester = document.getElementById('print-filter-semester').value;
+            const printYear = document.getElementById('print-filter-academic-year').value;
+
+            const printData = allRepairs.filter(i => {
+                if (!i['วันที่แจ้ง']) return false;
+                const d = i['วันที่แจ้ง'].split('/');
+                const date = new Date(`${d[2]}-${d[1]}-${d[0]}`);
+                return (!status || i['สถานะการดำเนินการ'] === status) &&
+                       (!printSemester || i['ภาคเรียน'] === printSemester) &&
+                       (!printYear || i['ปีการศึกษา'] === printYear) &&
+                       (date >= sDate && date <= eDate);
+            });
+
+            const rows = printData.length ? printData.map(i => {
+                const semYear = (i['ภาคเรียน'] && i['ปีการศึกษา']) ? `${i['ภาคเรียน']}/${i['ปีการศึกษา']}` : (i['ภาคเรียน'] || i['ปีการศึกษา'] || '-');
+                return `<tr>
+                    <td>${i['วันที่แจ้ง']}</td>
+                    <td>${i['ชื่อ-นามสกุล']}</td>
+                    <td>${i['อุปกรณ์หรือจุดที่แจ้งซ่อม']}</td>
+                    <td>${semYear}</td>
+                    <td>${i['สถานะการดำเนินการ']}</td>
+                </tr>`;
+            }).join('') : `<tr><td colspan="5" style="text-align:center;">ไม่พบข้อมูล</td></tr>`;
+
+            let filterInfo = `ช่วงวันที่ ${document.getElementById('start-date').value} ถึง ${document.getElementById('end-date').value}`;
+            if (status) filterInfo += ` | สถานะ: ${status}`;
+            if (printSemester) filterInfo += ` | ภาคเรียนที่: ${printSemester}`;
+            if (printYear) filterInfo += ` | ปีการศึกษา: ${printYear}`;
+
+            document.getElementById('print-area').innerHTML = `
+                <h1 class="print-header">รายงานการแจ้งซ่อม (NPC SERVICE)</h1>
+                <h2 style="text-align:center;font-family:'Sarabun';margin-bottom:1rem;font-size:12pt;color:#475569;">${filterInfo}</h2>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>ชื่อผู้แจ้ง</th>
+                            <th>จุดที่แจ้งซ่อม</th>
+                            <th>ภาคเรียน/ปีการศึกษา</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            `;
+            document.getElementById('print-modal').classList.add('hidden');
+            document.getElementById('print-area').classList.remove('hidden');
+            window.print();
+            document.getElementById('print-area').classList.add('hidden');
         }
     });
     </script>

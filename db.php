@@ -48,10 +48,24 @@ try {
         `file_ids` TEXT DEFAULT NULL,
         `file_urls` TEXT DEFAULT NULL,
         `notes` TEXT DEFAULT NULL,
+        `semester` VARCHAR(20) DEFAULT NULL,
+        `academic_year` VARCHAR(20) DEFAULT NULL,
         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     $pdo->exec($createRepairsTable);
+
+    // Alter table to add semester and academic_year to existing tables
+    try {
+        $pdo->exec("ALTER TABLE `repairs` ADD COLUMN `semester` VARCHAR(20) DEFAULT NULL AFTER `notes`");
+    } catch (Exception $e) {
+        // ignore if exists
+    }
+    try {
+        $pdo->exec("ALTER TABLE `repairs` ADD COLUMN `academic_year` VARCHAR(20) DEFAULT NULL AFTER `semester`");
+    } catch (Exception $e) {
+        // ignore if exists
+    }
 
     // 6. Create settings table
     $createSettingsTable = "CREATE TABLE IF NOT EXISTS `settings` (

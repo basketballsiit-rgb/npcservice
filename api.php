@@ -182,10 +182,14 @@ function submitRepairForm($formObject) {
         $timestamp = round(microtime(true) * 1000);
         $referenceId = "BD-" . $timestamp;
 
+        // Fetch current semester and academic year
+        $currentSemester = getSetting('current_semester', '1');
+        $currentYear = getSetting('current_academic_year', '2569');
+
         // Insert into DB
         $sql = "INSERT INTO `repairs` 
-                (`reference_id`, `request_date`, `status`, `full_name`, `position`, `phone`, `contact_back`, `repair_type`, `location_building`, `location_room`, `details`, `file_ids`, `file_urls`, `notes`) 
-                VALUES (?, ?, 'ยังไม่ดำเนินการ', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '-')";
+                (`reference_id`, `request_date`, `status`, `full_name`, `position`, `phone`, `contact_back`, `repair_type`, `location_building`, `location_room`, `details`, `file_ids`, `file_urls`, `notes`, `semester`, `academic_year`) 
+                VALUES (?, ?, 'ยังไม่ดำเนินการ', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '-', ?, ?)";
         
         $stmt = $db->prepare($sql);
         $stmt->execute([
@@ -200,7 +204,9 @@ function submitRepairForm($formObject) {
             $formObject['location_room'],
             $formObject['details'],
             implode(', ', $fileIds),
-            implode(', ', $fileUrls)
+            implode(', ', $fileUrls),
+            $currentSemester,
+            $currentYear
         ]);
 
         // Send LINE Notification
@@ -251,6 +257,8 @@ function getRepairData() {
             $obj['ID หลักฐาน'] = $row['file_ids'] ? $row['file_ids'] : '';
             $obj['ลิงก์หลักฐาน'] = $row['file_urls'] ? $row['file_urls'] : '';
             $obj['หมายเหตุ'] = $row['notes'];
+            $obj['ภาคเรียน'] = $row['semester'] ? $row['semester'] : '';
+            $obj['ปีการศึกษา'] = $row['academic_year'] ? $row['academic_year'] : '';
             $obj['rowNumber'] = (int)$row['id'];
 
             $result[] = $obj;
@@ -267,10 +275,14 @@ function getRepairData() {
 function getFormConfig() {
     $types = json_decode(getSetting('repair_types', '[]'), true);
     $locations = json_decode(getSetting('repair_locations', '[]'), true);
+    $semesters = json_decode(getSetting('semesters', '["1", "2"]'), true);
+    $years = json_decode(getSetting('academic_years', '["2568", "2569", "2570"]'), true);
     return [
         "status" => "success",
         "repair_types" => $types,
-        "repair_locations" => $locations
+        "repair_locations" => $locations,
+        "semesters" => $semesters,
+        "academic_years" => $years
     ];
 }
 
@@ -347,12 +359,18 @@ function deleteRepair($rowNumber, $fileIdsString) {
 function getSystemSettings() {
     $types = json_decode(getSetting('repair_types', '[]'), true);
     $locations = json_decode(getSetting('repair_locations', '[]'), true);
+    $semesters = json_decode(getSetting('semesters', '["1", "2"]'), true);
+    $years = json_decode(getSetting('academic_years', '["2568", "2569", "2570"]'), true);
     return [
         "status" => "success",
         "line_channel_access_token" => getSetting('line_channel_access_token', LINE_CHANNEL_ACCESS_TOKEN),
         "line_target_id" => getSetting('line_target_id', LINE_TARGET_ID),
         "repair_types" => $types,
-        "repair_locations" => $locations
+        "repair_locations" => $locations,
+        "current_semester" => getSetting('current_semester', '1'),
+        "current_academic_year" => getSetting('current_academic_year', '2569'),
+        "semesters" => $semesters,
+        "academic_years" => $years
     ];
 }
 
@@ -369,11 +387,19 @@ function updateSystemSettings($settings) {
         $lineTarget = isset($settings['line_target_id']) ? trim($settings['line_target_id']) : '';
         $repairTypes = isset($settings['repair_types']) ? $settings['repair_types'] : [];
         $repairLocations = isset($settings['repair_locations']) ? $settings['repair_locations'] : [];
+        $currentSemester = isset($settings['current_semester']) ? trim($settings['current_semester']) : '1';
+        $currentYear = isset($settings['current_academic_year']) ? trim($settings['current_academic_year']) : '2569';
+        $semesters = isset($settings['semesters']) ? $settings['semesters'] : ["1", "2"];
+        $years = isset($settings['academic_years']) ? $settings['academic_years'] : ["2568", "2569", "2570"];
 
         setSetting('line_channel_access_token', $lineToken);
         setSetting('line_target_id', $lineTarget);
         setSetting('repair_types', json_encode($repairTypes, JSON_UNESCAPED_UNICODE));
         setSetting('repair_locations', json_encode($repairLocations, JSON_UNESCAPED_UNICODE));
+        setSetting('current_semester', $currentSemester);
+        setSetting('current_academic_year', $currentYear);
+        setSetting('semesters', json_encode($semesters, JSON_UNESCAPED_UNICODE));
+        setSetting('academic_years', json_encode($years, JSON_UNESCAPED_UNICODE));
 
         return ["status" => "success", "message" => "บันทึกตั้งค่าระบบเรียบร้อยแล้ว"];
     } catch (Exception $e) {
