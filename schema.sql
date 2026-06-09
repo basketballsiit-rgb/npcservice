@@ -38,3 +38,22 @@ CREATE TABLE IF NOT EXISTS `repairs` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Table structure for table `settings`
+CREATE TABLE IF NOT EXISTS `settings` (
+  `setting_key` VARCHAR(50) PRIMARY KEY,
+  `setting_value` TEXT NULL,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed default settings configuration
+INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
+('line_channel_access_token', 'cabR6U86yHWSaQcYKaFzuR5b4+YJ5ZHlie9IlAfj+3Dg2jzKTdNd6+u8PVVkaX28xU1asucvn6WzzVBUUJ7Ro6QyHPiSQA8I7h+af1UiUBs2KLSZVFGNalnuaoxKh1NffMjtOj/qno5AbgjKpvmkFQdB04t89/1O/w1cDnyilFU='),
+('line_target_id', 'C6e6890ddf619793273e9f4df4fc0ef18'),
+('repair_types', '[\"ระบบไฟฟ้า/เครื่องปรับอากาศ\",\"การซ่อมบำรุงทั่วไป (งานอาคาร)\"]'),
+('repair_locations', '[\"อาคาร 1 สามัญสัมพันธ์\",\"อาคาร 2 ระยะสั้นเสริมสวย\",\"อาคาร 3 เทคโนโลยีสารสนเทศ\",\"อาคาร 4 ระยะสั้นคหกรรม\",\"อาคาร 5 ห้องเรียนทฤษฎี\",\"อาคาร 6 ตึก 60 ปีอาชีวะ\",\"อาคาร 7 อาคารวิทยบริการ\",\"อาคาร 8 ช่างอุตสาหกรรม\",\"อาคารลานสายน้ำผึ้ง\",\"อาคารหลังคาเอนกประสงค์ (โดม)\",\"อาคารโรงอาหาร\",\"อาคารศูนย์บ่มเพาะ\"]'),
+('semesters', '[\"1\",\"2\"]'),
+('academic_years', '[\"2568\",\"2569\",\"2570\"]'),
+('current_semester', '1'),
+('current_academic_year', '2569')
+ON DUPLICATE KEY UPDATE `setting_key` = VALUES(`setting_key`);
