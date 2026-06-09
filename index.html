@@ -424,15 +424,20 @@
                     <div id="admin-settings-content" class="hidden space-y-8">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <!-- Left: LINE Notification Configuration -->
-                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
-                                <h3 class="text-lg font-bold text-indigo-600 border-b border-slate-200 pb-2">🔔 ตั้งค่า LINE Notifications</h3>
-                                <div>
-                                    <label class="block text-sm font-semibold text-slate-700 mb-1">LINE Channel Access Token</label>
-                                    <textarea id="settings-line-token" roles="textbox" rows="3" class="custom-input-light w-full px-4 py-2.5 text-sm" placeholder="ใส่ Channel Access Token ที่นี่..."></textarea>
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4 flex flex-col justify-between">
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-bold text-indigo-600 border-b border-slate-200 pb-2">🔔 ตั้งค่า LINE Notifications</h3>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-1">LINE Channel Access Token</label>
+                                        <textarea id="settings-line-token" roles="textbox" rows="3" class="custom-input-light w-full px-4 py-2.5 text-sm" placeholder="ใส่ Channel Access Token ที่นี่..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-slate-700 mb-1">LINE Target ID (Group ID / User ID)</label>
+                                        <input type="text" id="settings-line-target" class="custom-input-light w-full px-4 py-2.5 text-sm" placeholder="ใส่ Group ID หรือ User ID ที่นี่...">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-slate-700 mb-1">LINE Target ID (Group ID / User ID)</label>
-                                    <input type="text" id="settings-line-target" class="custom-input-light w-full px-4 py-2.5 text-sm" placeholder="ใส่ Group ID หรือ User ID ที่นี่...">
+                                <div class="pt-2">
+                                    <button id="test-line-btn" class="px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold transition shadow-md flex items-center gap-1.5 text-sm">📲 ทดสอบส่งแจ้งเตือน</button>
                                 </div>
                             </div>
                             
@@ -685,6 +690,7 @@
             // Admin Settings Action Buttons
             document.getElementById('save-settings-btn').addEventListener('click', saveSystemSettings);
             document.getElementById('save-password-btn').addEventListener('click', saveAdminPassword);
+            document.getElementById('test-line-btn').addEventListener('click', testLineNotification);
         }
 
         function formatPhoneNumber(phone) {
@@ -766,6 +772,28 @@
                 Swal.close();
                 Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: err.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
             }).changeAdminPassword(currentPass, newPass);
+        }
+
+        function testLineNotification() {
+            const token = document.getElementById('settings-line-token').value.trim();
+            const target = document.getElementById('settings-line-target').value.trim();
+            if (!token || !target) {
+                Swal.fire({ icon: 'warning', title: 'คำเตือน', text: 'กรุณากรอก Token และ Target ID ก่อนทดสอบ', customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+                return;
+            }
+
+            showLoader('กำลังส่งข้อความทดสอบ...');
+            google.script.run.withSuccessHandler(res => {
+                Swal.close();
+                if (res.status === 'success') {
+                    Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'การส่งล้มเหลว', text: res.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+                }
+            }).withFailureHandler(err => {
+                Swal.close();
+                Swal.fire({ icon: 'error', title: 'ข้อผิดพลาด', text: err.message, customClass: { popup: 'rounded-3xl shadow-2xl border border-slate-200 bg-white' } });
+            }).testLineNotification(token, target);
         }
 
         async function showAdminLogin(e) {

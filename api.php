@@ -99,6 +99,16 @@ switch ($action) {
         echo json_encode(updateSystemSettings($settingsObject));
         break;
 
+    case 'testLineNotification':
+        if (!isAdminLoggedIn()) {
+            echo json_encode(["status" => "error", "message" => "Unauthorized access"]);
+            exit;
+        }
+        $lineToken = isset($arguments[0]) ? trim($arguments[0]) : '';
+        $lineTarget = isset($arguments[1]) ? trim($arguments[1]) : '';
+        echo json_encode(testLineNotification($lineToken, $lineTarget));
+        break;
+
     case 'changeAdminPassword':
         if (!isAdminLoggedIn()) {
             echo json_encode(["status" => "error", "message" => "Unauthorized access"]);
@@ -496,6 +506,51 @@ function sendLineMessageApi($messageText, $imageUrl = null) {
     } catch (Exception $e) {
         error_log("LINE API Error: " . $e->getMessage());
         return false;
+    }
+}
+
+/**
+ * 11. Test LINE Notification configuration
+ */
+function testLineNotification($token, $target) {
+    if (empty($token) || empty($target)) {
+        return ["status" => "error", "message" => "กรุณากรอกข้อมูล Token และ Target ID ก่อนการทดสอบ"];
+    }
+    
+    try {
+        $url = "https://api.line.me/v2/bot/message/push";
+        $headers = [
+            "Content-Type: application/json",
+            "Authorization: Bearer " . $token
+        ];
+        $messages = [
+            [
+                "type" => "text",
+                "text" => "🔔 [ระบบแจ้งซ่อม งานอาคารสถานที่]\nทดสอบการส่งข้อความแจ้งเตือนผ่าน LINE Messaging API สำเร็จแล้ว!"
+            ]
+        ];
+        $payload = [
+            "to" => $target,
+            "messages" => $messages
+        ];
+        
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            return ["status" => "error", "message" => "LINE API returned HTTP Code $httpCode. Response: $response"];
+        }
+        return ["status" => "success", "message" => "ส่งข้อความทดสอบเข้ากลุ่มไลน์สำเร็จแล้ว!"];
+    } catch (Exception $e) {
+        return ["status" => "error", "message" => $e->getMessage()];
     }
 }
 ?>
