@@ -125,6 +125,246 @@
             .print-table { width: 100%; border-collapse: collapse; font-family: 'Sarabun'; font-size: 14pt; }
             .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; }
         }
+
+        /* --- Dynamic Theme Toggle Styles --- */
+        
+        /* Light Theme Overrides */
+        body.light-mode {
+            background-color: #f8fafc !important; /* slate-50 */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
+                radial-gradient(at 50% 0%, rgba(16, 185, 129, 0.02) 0px, transparent 40%) !important;
+            color: #1e293b !important; /* slate-800 */
+        }
+
+        /* Override glass cards in light mode */
+        body.light-mode .glass-card {
+            background: rgba(255, 255, 255, 0.85) !important;
+            border: 1px solid #e2e8f0 !important; /* slate-200 */
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+        }
+        body.light-mode .glass-card-hover:hover {
+            background: #ffffff !important;
+            border-color: rgba(99, 102, 241, 0.3) !important;
+            box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.1), 0 10px 10px -5px rgba(99, 102, 241, 0.04) !important;
+        }
+
+        /* Override inputs in light mode */
+        body.light-mode .custom-input {
+            background-color: #ffffff !important;
+            border: 1px solid #cbd5e1 !important; /* slate-300 */
+            color: #1e293b !important;
+        }
+        body.light-mode .custom-input:focus {
+            border-color: #4f46e5 !important; /* indigo-600 */
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15) !important;
+            background-color: #ffffff !important;
+        }
+        body.light-mode .custom-input::placeholder {
+            color: #94a3b8 !important;
+        }
+        body.light-mode select.custom-input {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+        }
+
+        /* Override drop zone in light mode */
+        body.light-mode .drop-zone {
+            border: 2px dashed #cbd5e1 !important;
+            background-color: #f8fafc !important;
+        }
+        body.light-mode .drop-zone:hover, body.light-mode .drop-zone.dragover {
+            background-color: rgba(79, 70, 229, 0.04) !important;
+            border-color: #4f46e5 !important;
+        }
+
+        /* Override specific slate text & background utility classes in light mode */
+        body.light-mode .text-slate-100,
+        body.light-mode .text-slate-200,
+        body.light-mode .text-slate-300,
+        body.light-mode .text-slate-400 {
+            color: #1e293b !important;
+        }
+        body.light-mode .text-slate-500 {
+            color: #64748b !important;
+        }
+        body.light-mode .text-slate-600 {
+            color: #475569 !important;
+        }
+        body.light-mode .bg-slate-900\/60,
+        body.light-mode .bg-slate-950\/40 {
+            background-color: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+        }
+        body.light-mode .border-white\/5 {
+            border-color: #e2e8f0 !important;
+        }
+        body.light-mode .bg-indigo-950\/20 {
+            background-color: rgba(79, 70, 229, 0.05) !important;
+            border-color: rgba(79, 70, 229, 0.1) !important;
+        }
+        body.light-mode .text-indigo-300 {
+            color: #4f46e5 !important;
+        }
+        body.light-mode .text-indigo-400 {
+            color: #4338ca !important;
+        }
+        body.light-mode .bg-gradient-to-r.from-slate-900.to-indigo-950 {
+            background-image: linear-gradient(to right, #f1f5f9, #e2e8f0) !important;
+        }
+        body.light-mode #theme-toggle-btn {
+            border-color: #cbd5e1 !important;
+            background-color: #ffffff !important;
+            color: #475569 !important;
+        }
+        body.light-mode #theme-toggle-btn:hover {
+            background-color: #f1f5f9 !important;
+            color: #1e293b !important;
+        }
+        body.light-mode #admin-top-login-btn {
+            background-color: rgba(79, 70, 229, 0.1) !important;
+            border-color: rgba(79, 70, 229, 0.2) !important;
+            color: #4f46e5 !important;
+        }
+        body.light-mode #admin-top-login-btn:hover {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+        }
+
+        /* Toggle sun/moon paths in SVG icon */
+        body.light-mode #sun-path {
+            display: none;
+        }
+        body.light-mode #moon-path {
+            display: block;
+        }
+
+        /* --- Admin Page Dark mode overrides (active when body does NOT have .light-mode) --- */
+        body:not(.light-mode) #admin-page section {
+            background-color: rgba(21, 29, 48, 0.75) !important;
+            border-color: rgba(255, 255, 255, 0.05) !important;
+            color: #f1f5f9 !important;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        body:not(.light-mode) #admin-page h2 {
+            color: #ffffff !important;
+        }
+        body:not(.light-mode) #admin-page .border-b {
+            border-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        body:not(.light-mode) #admin-page .border-slate-200 {
+            border-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        body:not(.light-mode) #admin-page .custom-input-light {
+            background-color: rgba(13, 21, 39, 0.8) !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            color: #f8fafc !important;
+        }
+        body:not(.light-mode) #admin-page .custom-input-light:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15) !important;
+            background-color: rgba(13, 21, 39, 0.95) !important;
+        }
+        body:not(.light-mode) #admin-page .custom-input-light::placeholder {
+            color: #475569 !important;
+        }
+        body:not(.light-mode) #admin-page select.custom-input-light {
+            background-color: rgba(13, 21, 39, 0.8) !important;
+            color: #f8fafc !important;
+        }
+        body:not(.light-mode) #admin-page .bg-slate-100 {
+            background-color: rgba(15, 23, 42, 0.6) !important;
+        }
+        body:not(.light-mode) #admin-page th {
+            color: #94a3b8 !important;
+        }
+        body:not(.light-mode) #admin-page td {
+            color: #cbd5e1 !important;
+        }
+        body:not(.light-mode) #admin-table-body tr {
+            background-color: rgba(21, 29, 48, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+        body:not(.light-mode) #admin-table-body tr:hover {
+            background-color: rgba(99, 102, 241, 0.08) !important;
+        }
+        body:not(.light-mode) #admin-page .overflow-hidden.bg-white {
+            background-color: rgba(21, 29, 48, 0.75) !important;
+        }
+        body:not(.light-mode) #admin-page .bg-slate-50 {
+            background-color: rgba(15, 23, 42, 0.4) !important;
+            border-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        body:not(.light-mode) #admin-page label {
+            color: #cbd5e1 !important;
+        }
+        body:not(.light-mode) #admin-page h3 {
+            border-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        body:not(.light-mode) #admin-page .text-indigo-600 {
+            color: #818cf8 !important; /* indigo-400 */
+        }
+        body:not(.light-mode) #admin-page button#tab-settings-btn.text-slate-500:hover,
+        body:not(.light-mode) #admin-page button#tab-repairs-btn.text-slate-500:hover {
+            color: #ffffff !important;
+        }
+        body:not(.light-mode) #admin-page #admin-pagination-controls button.bg-white {
+            background-color: rgba(13, 21, 39, 0.8) !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            color: #cbd5e1 !important;
+        }
+        body:not(.light-mode) #admin-page #admin-pagination-controls button.bg-white:hover:not(:disabled) {
+            background-color: rgba(21, 29, 48, 0.9) !important;
+            color: #ffffff !important;
+        }
+        body:not(.light-mode) #admin-page #admin-pagination-controls span {
+            color: #94a3b8 !important;
+        }
+
+        /* Print Modal in dark mode */
+        body:not(.light-mode) #print-modal .bg-white {
+            background-color: #0f172a !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            color: #f1f5f9 !important;
+        }
+        body:not(.light-mode) #print-modal h3,
+        body:not(.light-mode) #print-modal label {
+            color: #f1f5f9 !important;
+        }
+        body:not(.light-mode) #print-modal select,
+        body:not(.light-mode) #print-modal input {
+            background-color: rgba(13, 21, 39, 0.8) !important;
+            border-color: rgba(255, 255, 255, 0.08) !important;
+            color: #f8fafc !important;
+        }
+
+        /* SweetAlert popup overrides */
+        body:not(.light-mode) .swal2-popup.bg-white {
+            background-color: #0f172a !important;
+            color: #f1f5f9 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        }
+        body:not(.light-mode) .swal2-popup.bg-white .swal2-title,
+        body:not(.light-mode) .swal2-popup.bg-white .swal2-html-container,
+        body:not(.light-mode) .swal2-popup.bg-white label {
+            color: #f1f5f9 !important;
+        }
+        body:not(.light-mode) .swal2-popup.bg-white input,
+        body:not(.light-mode) .swal2-popup.bg-white textarea,
+        body:not(.light-mode) .swal2-popup.bg-white select {
+            background-color: rgba(13, 21, 39, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #f8fafc !important;
+        }
+        body:not(.light-mode) .swal2-popup.bg-white input:focus,
+        body:not(.light-mode) .swal2-popup.bg-white textarea:focus,
+        body:not(.light-mode) .swal2-popup.bg-white select:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -136,9 +376,17 @@
                 <img src="https://img2.pic.in.th/pic/Logo-.641ef5fae2216b71.png" alt="Logo" class="h-10 w-10 object-cover rounded-full border border-indigo-500/20">
                 <span class="font-bold text-slate-200 hidden sm:inline-block text-sm sm:text-base">งานอาคารสถานที่ วิทยาลัยสารพัดช่างน่าน</span>
             </div>
-            <button id="admin-top-login-btn" class="px-4 py-2 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white font-bold rounded-xl border border-indigo-500/30 shadow-md transition-all duration-200 flex items-center gap-1.5 text-sm">
-                🔒 เข้าสู่ระบบ Admin
-            </button>
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle-btn" class="p-2.5 rounded-xl border border-slate-700/50 bg-slate-900/60 hover:bg-slate-800 text-slate-300 hover:text-white transition-all duration-200 flex items-center justify-center shadow-md" title="สลับโหมด มืด/สว่าง">
+                    <svg id="theme-toggle-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path id="sun-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-11.314l.707.707m11.314 11.314l.707-.707M12 7a5 5 0 100 10 5 5 0 000-10z"></path>
+                        <path id="moon-path" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
+                <button id="admin-top-login-btn" class="px-4 py-2 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white font-bold rounded-xl border border-indigo-500/30 shadow-md transition-all duration-200 flex items-center gap-1.5 text-sm">
+                    🔒 เข้าสู่ระบบ Admin
+                </button>
+            </div>
         </div>
 
         <header class="text-center mb-12 mt-6">
@@ -578,6 +826,14 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+        } else {
+            document.body.classList.remove('light-mode');
+        }
+
         // --- VARIABLES ---
         const userPage = document.getElementById('user-page');
         const adminPage = document.getElementById('admin-page');
@@ -590,9 +846,10 @@
         const MAX_FILES = 1;
         let myChart = null, typeChart = null, locationChart = null; // Chart instances
 
-        // Set Chart.js Defaults for Dark Mode
-        Chart.defaults.color = '#94a3b8';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.04)';
+        // Set Chart.js Defaults based on Theme
+        const isThemeLight = document.body.classList.contains('light-mode');
+        Chart.defaults.color = isThemeLight ? '#475569' : '#94a3b8';
+        Chart.defaults.borderColor = isThemeLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.04)';
         Chart.defaults.font.family = "'Kanit', sans-serif";
 
         // --- INIT ---
@@ -633,6 +890,24 @@
         }
 
         function addEventListeners() {
+            // Theme Toggle Event Listener
+            const themeBtn = document.getElementById('theme-toggle-btn');
+            if (themeBtn) {
+                themeBtn.addEventListener('click', () => {
+                    const isLight = document.body.classList.toggle('light-mode');
+                    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                    
+                    // Update Chart.js global defaults
+                    Chart.defaults.color = isLight ? '#475569' : '#94a3b8';
+                    Chart.defaults.borderColor = isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.04)';
+                    
+                    // Re-render dashboard if repairs data is loaded
+                    if (allRepairs && allRepairs.length > 0) {
+                        renderDashboard(allRepairs);
+                    }
+                });
+            }
+
             document.getElementById('admin-top-login-btn').addEventListener('click', showAdminLogin);
             
             // Logout Session and UI Toggle
@@ -835,6 +1110,7 @@
         }
 
         function renderDashboard(data) {
+            const isLight = document.body.classList.contains('light-mode');
             document.getElementById('total-repairs').textContent = data.length;
             document.getElementById('resolved-repairs').textContent = data.filter(c => c['สถานะการดำเนินการ'] === 'ดำเนินการแล้ว').length;
             document.getElementById('pending-repairs').textContent = data.filter(c => c['สถานะการดำเนินการ'] === 'อยู่ระหว่างดำเนินการ').length;
@@ -876,8 +1152,8 @@
                     maintainAspectRatio: false, 
                     plugins: { legend: { display: false } }, 
                     scales: { 
-                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.03)' } }, 
-                        x: { grid: { display: false } } 
+                        y: { beginAtZero: true, grid: { color: isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.03)' }, ticks: { color: isLight ? '#475569' : '#94a3b8' } }, 
+                        x: { grid: { display: false }, ticks: { color: isLight ? '#475569' : '#94a3b8' } } 
                     } 
                 }
             });
@@ -899,7 +1175,7 @@
                     datasets: [{
                         data: Object.values(typeCount),
                         backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-                        borderColor: '#111827',
+                        borderColor: isLight ? '#ffffff' : '#111827',
                         borderWidth: 2
                     }]
                 },
@@ -909,7 +1185,7 @@
                     plugins: { 
                         legend: { 
                             position: 'bottom', 
-                            labels: { boxWidth: 8, padding: 8, font: { size: 10 } } 
+                            labels: { boxWidth: 8, padding: 8, font: { size: 10 }, color: isLight ? '#475569' : '#94a3b8' } 
                         } 
                     },
                     cutout: '65%'
@@ -944,7 +1220,7 @@
                     datasets: [{
                         data: Object.values(locCount),
                         backgroundColor: ['#3b82f6', '#0ea5e9', '#06b6d4', '#14b8a6', '#22c55e', '#84cc16', '#eab308', '#f97316', '#f43f5e', '#d946ef', '#8b5cf6', '#64748b'],
-                        borderColor: '#111827',
+                        borderColor: isLight ? '#ffffff' : '#111827',
                         borderWidth: 2
                     }]
                 },
