@@ -18,4 +18,5 @@ jobs:
         # คำสั่งที่จะรันบนเซิร์ฟเวอร์จริงสำหรับโปรเจกต์ npcservice
         script: |
           cd /var/www/html/npcservice
-          git pull origin main
+          git fetch origin main
+          git reset --hard origin/main
