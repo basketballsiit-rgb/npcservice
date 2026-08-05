@@ -617,7 +617,7 @@
                             <option>อยู่ระหว่างดำเนินการ</option>
                             <option>ดำเนินการแล้ว</option>
                         </select>
-                        <input type="text" id="user-search-ref-id" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="custom-input w-full md:w-3/4 px-4 py-2">
+                        <input type="search" id="user-search-ref-id" name="prevent_autofill_user" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="custom-input w-full md:w-3/4 px-4 py-2" autocomplete="off">
                     </div>
                     
                     <div class="overflow-hidden rounded-xl border border-white/5 shadow-sm">
@@ -670,7 +670,7 @@
                             <select id="admin-filter-academic-year" class="custom-input-light px-4 py-2 bg-white w-full">
                                 <option value="">ปีการศึกษาทั้งหมด</option>
                             </select>
-                            <input type="text" id="admin-search-ref-id" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="custom-input-light px-4 py-2 w-full">
+                            <input type="search" id="admin-search-ref-id" name="prevent_autofill_admin" placeholder="🔍 ค้นหาด้วยเลขที่อ้างอิง..." class="custom-input-light px-4 py-2 w-full" autocomplete="off">
                         </div>
 
                         <!-- Summary Bar -->
