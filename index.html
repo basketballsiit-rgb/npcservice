@@ -233,23 +233,33 @@
         /* Print Configuration */
 
         @media print {
-
             body { background: none; color: #000; }
-
             body * { visibility: hidden; }
-
             #print-area, #print-area * { visibility: visible; }
-
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
-
-            @page { size: A4; margin: 2cm; }
-
-            .print-header { text-align: center; font-family: 'Sarabun'; font-size: 18pt; font-weight: bold; }
-
-            .print-table { width: 100%; border-collapse: collapse; font-family: 'Sarabun'; font-size: 14pt; }
-
-            .print-table th, .print-table td { border: 1px solid #000; padding: 8px; text-align: left; }
-
+            #print-area { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important;
+            }
+            @page { size: A4 portrait; margin: 20mm 15mm 20mm 15mm; }
+            .print-header { 
+                text-align: center; 
+                font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important; 
+                font-size: 20pt; 
+                font-weight: bold; 
+                line-height: 1.3;
+                margin-bottom: 15px;
+            }
+            .print-table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important; 
+                font-size: 15pt; 
+            }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px 10px; text-align: left; }
+            .print-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
 
 
@@ -3571,7 +3581,7 @@
             let summaryHtml = "";
 
             if (reportFormat === 'detailed') {
-                printTitle = "รายงานรายละเอียดการแจ้งซ่อม (NPC SERVICE)";
+                printTitle = "รายงานรายละเอียดการแจ้งซ่อม<br>(NPC SERVICE)";
                 tableHeaderHtml = `
                     <tr>
                         <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold;">วันที่</th>
@@ -3606,7 +3616,7 @@
                 const sortedYears = Object.keys(yearCounts).sort();
                 if (sortedYears.length > 0) {
                     summaryHtml += `
-                        <div style="margin-top: 30px; page-break-inside: avoid; font-family: 'Sarabun';">
+                        <div style="margin-top: 30px; page-break-inside: avoid; font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;">
                             <h3 style="font-size: 14pt; font-weight: bold; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px;">📊 สรุปยอดรวมรายงานการแจ้งซ่อม</h3>
                             <table style="width: 100%; border-collapse: collapse; font-size: 12pt;">
                                 <thead>
@@ -3641,7 +3651,7 @@
                     `;
                 }
             } else if (reportFormat === 'summary_type') {
-                printTitle = "รายงานสรุปยอดการแจ้งซ่อมแยกตามประเภทงาน (NPC SERVICE)";
+                printTitle = "รายงานสรุปยอดการแจ้งซ่อมแยกตามประเภทงาน<br>(NPC SERVICE)";
                 tableHeaderHtml = `
                     <tr>
                         <th style="border: 1px solid #000; padding: 8px; width: 80px; text-align: center; font-weight: bold;">ลำดับ</th>
@@ -3680,7 +3690,7 @@
                     `;
                 }
             } else if (reportFormat === 'summary_building') {
-                printTitle = "รายงานสรุปยอดการแจ้งซ่อมแยกตามอาคารสถานที่ (NPC SERVICE)";
+                printTitle = "รายงานสรุปยอดการแจ้งซ่อมแยกตามอาคารสถานที่<br>(NPC SERVICE)";
                 tableHeaderHtml = `
                     <tr>
                         <th style="border: 1px solid #000; padding: 8px; width: 80px; text-align: center; font-weight: bold;">ลำดับ</th>
