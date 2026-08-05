@@ -626,7 +626,9 @@
                                 <thead class="bg-slate-950/40">
                                     <tr>
                                         <th class="px-6 py-4 text-left text-sm font-bold text-slate-300 uppercase tracking-wider">วันที่</th>
-                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-300 uppercase tracking-wider">เลขที่อ้างอิง</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-300 uppercase tracking-wider">ชื่อผู้แจ้ง</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-300 uppercase tracking-wider">ประเภทการแจ้ง</th>
+                                        <th class="px-6 py-4 text-left text-sm font-bold text-slate-300 uppercase tracking-wider">อาคาร</th>
                                         <th class="px-6 py-4 text-left text-sm font-bold text-slate-300 uppercase tracking-wider">สถานะ</th>
                                         <th class="px-6 py-4 text-left text-sm font-bold text-slate-300 uppercase tracking-wider">หมายเหตุ</th>
                                     </tr>
@@ -1644,7 +1646,16 @@
                 const badge = `<span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full ${statusClass}">${item['สถานะการดำเนินการ']}</span>`;
                 
                 if (type === 'user') {
-                    tr.innerHTML = `<td class="px-6 py-4 text-sm text-slate-400">${item['วันที่แจ้ง']}</td><td class="px-6 py-4 text-sm font-semibold text-indigo-400">${item['เลขที่อ้างอิง']}</td><td class="px-6 py-4 text-sm">${badge}</td><td class="px-6 py-4 text-sm text-slate-400 max-w-xs truncate">${item['หมายเหตุ'] || '-'}</td>`;
+                    const match = item['รายละเอียดที่ต้องการแจ้งซ่อม'] ? item['รายละเอียดที่ต้องการแจ้งซ่อม'].match(/^\[(.*?)\]/) : null;
+                    const repairType = match ? match[1] : "อื่นๆ";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 text-sm text-slate-400 whitespace-nowrap">${item['วันที่แจ้ง']}</td>
+                        <td class="px-6 py-4 text-sm font-semibold text-slate-200">${item['ชื่อ-นามสกุล']}</td>
+                        <td class="px-6 py-4 text-sm text-indigo-400 font-medium">${repairType}</td>
+                        <td class="px-6 py-4 text-sm text-slate-300 max-w-xs truncate" title="${item['อุปกรณ์หรือจุดที่แจ้งซ่อม']}">${item['อุปกรณ์หรือจุดที่แจ้งซ่อม']}</td>
+                        <td class="px-6 py-4 text-sm">${badge}</td>
+                        <td class="px-6 py-4 text-sm text-slate-400 max-w-xs truncate" title="${item['หมายเหตุ'] || '-'}">${item['หมายเหตุ'] || '-'}</td>
+                    `;
                 } else {
                     const files = item['ลิงก์หลักฐาน'] ? item['ลิงก์หลักฐาน'].split(',').map((url, i) => `<a href="${url.trim()}" target="_blank" class="text-indigo-600 hover:text-indigo-800 font-semibold hover:underline">📄 ไฟล์ ${i+1}</a>`).join(' ') : '-';
                     const semYear = (item['ภาคเรียน'] && item['ปีการศึกษา']) ? `${item['ภาคเรียน']}/${item['ปีการศึกษา']}` : (item['ภาคเรียน'] || item['ปีการศึกษา'] || '-');
